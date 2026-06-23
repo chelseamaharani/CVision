@@ -7,7 +7,7 @@
 {{-- Judul --}}
 <h1 class="text-2xl font-bold text-[#7B82C9] text-center mb-6">Upload New Job</h1>
 
-<form action="{{ route('jobs.store') }}" method="POST" id="uploadJobForm">
+<form action="{{ route('job_listing.store') }}" method="POST" id="uploadJobForm">
     @csrf
 
     <div class="bg-[#DDE0F5] rounded-2xl p-8 flex flex-col gap-5 max-w-3xl mx-auto">

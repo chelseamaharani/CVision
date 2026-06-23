@@ -7,43 +7,34 @@ use Illuminate\Http\Request;
 class MatchingController extends Controller
 {
     /**
-     * Tampilkan hasil matching kandidat
+     * Tampilkan halaman Matching History (daftar posisi yang sudah di-screening)
      */
-    public function index(Request $request)
+    public function index()
     {
-        // Dummy data sementara biar view tidak error
-        $job = (object) [
-            'title' => 'Backend Developer'
-        ];
+        // Nanti ganti dengan query database:
+        // $historyList = Job::whereHas('matchingResults')->withCount('applicants')->get();
 
-        $stats = [
-            'matches'    => 5,
-            'candidates' => 20,
-            'accuracy'   => '82%',
-            'date'       => now()->format('M d, Y'),
-        ];
+        return view('pages.matching_history');
+    }
 
-        $candidates = [
-            [
-                'rank' => 1,
-                'initials' => 'BS',
-                'name' => 'Budi Santoso',
-                'role' => 'Software Engineer',
-                'score' => 92,
-                'top' => true,
-                'skills' => ['Python', 'SQL', 'REST API']
-            ],
-            [
-                'rank' => 2,
-                'initials' => 'AN',
-                'name' => 'Andi Nugraha',
-                'role' => 'Backend Developer',
-                'score' => 88,
-                'top' => false,
-                'skills' => ['Laravel', 'MySQL', 'API']
-            ],
-        ];
+    /**
+     * Tampilkan hasil matching/ranking untuk satu job tertentu
+     * (Dibuka dari tombol "View Results" di Matching History)
+     */
+    public function results(Request $request)
+    {
+        $jobId = $request->query('job_id');
 
-        return view('pages.matching_results', compact('job', 'stats', 'candidates'));
+        // Nanti ganti dengan query database:
+        // $job        = Job::findOrFail($jobId);
+        // $candidates = Candidate::withMatchingScore($jobId)->orderByDesc('score')->take(5)->get();
+        // $stats = [
+        //     'matches'    => $candidates->count(),
+        //     'candidates' => Candidate::where('job_id', $jobId)->count(),
+        //     'accuracy'   => $candidates->avg('score') . '%',
+        //     'date'       => now()->format('M d, Y'),
+        // ];
+
+        return view('pages.matching_results');
     }
 }

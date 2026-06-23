@@ -1,34 +1,57 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LandingPageController;
-use App\Http\Controllers\JobController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LandingPagePelamarController;
+use App\Http\Controllers\JobListingController;
 use App\Http\Controllers\MatchingController;
+use App\Http\Controllers\CandidatesController;
+use App\Http\Controllers\CandidateResumeController;
 use App\Http\Controllers\SettingsController;
 
-// ===== Landing Page =====
-Route::get('/', [LandingPageController::class, 'index'])->name('landing');
+// ===== AUTH =====
+Route::get('/login',    [LoginController::class, 'index'])->name('login');
+Route::post('/login',   [LoginController::class, 'login']);
+Route::post('/logout',  [LoginController::class, 'logout'])->name('logout');
 
-// ===== Auth sementara =====
-Route::get('/login', fn() => redirect('/'))->name('login');
-Route::get('/register', fn() => redirect('/'))->name('register');
-Route::post('/logout', fn() => redirect('/'))->name('logout');
+Route::get('/register', [RegisterController::class, 'index'])->name('register');
+Route::post('/register',[RegisterController::class, 'register']);
 
-// ===== Dashboard =====
-Route::get('/dashboard', fn() => view('pages.dashboard'))->name('dashboard');
+Route::get('/auth/google',     fn() => redirect('/login'))->name('auth.google');
+Route::get('/forgot-password', fn() => redirect('/login'))->name('password.request');
 
-// ===== JOB =====
-Route::get('/upload_job', [JobController::class, 'create'])->name('jobs.create');
-Route::post('/upload_job', [JobController::class, 'store'])->name('jobs.store');
-Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
+// ===== ROOT (/) - Landing page pelamar, BISA diakses tanpa login =====
+Route::get('/', [LandingPagePelamarController::class, 'index'])->name('landing');
 
-// ===== MATCHING =====
-Route::get('/matching', [MatchingController::class, 'index'])->name('matching.index');
-Route::get('/matching_results', [MatchingController::class, 'index'])->name('matching.results');
+// ===== AKSI PELAMAR YANG WAJIB LOGIN (submit CV, hapus CV) =====
+Route::middleware(['auth'])->group(function () {
+    Route::post('/upload-cv', [LandingPagePelamarController::class, 'store'])->name('cv.store');
+    Route::delete('/upload-cv/{id}', [LandingPagePelamarController::class, 'destroy'])->name('cv.destroy');
+});
 
-// ===== SETTINGS (FIXED) =====
-Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
-Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+// ===== DASHBOARD HRD & FITUR (admin only, perlu login) =====
+Route::middleware(['auth', 'role:admin'])->group(function () {
 
-// ===== LAINNYA =====
-Route::get('/candidates', fn() => view('pages.candidates'))->name('candidates.index');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Job Listing
+    Route::get('/job_listing/create',  [JobListingController::class, 'create'])->name('job_listing.create');
+    Route::post('/job_listing',        [JobListingController::class, 'store'])->name('job_listing.store');
+    Route::get('/job_listing',         [JobListingController::class, 'index'])->name('job_listing.index');
+    Route::post('/job_listing/{jobId}/screen', [JobListingController::class, 'screen'])->name('job_listing.screen');
+
+    // Matching (History + Results detail + Candidate detail)
+    Route::get('/matching',          [MatchingController::class, 'index'])->name('matching.index');
+    Route::get('/matching_results',  [MatchingController::class, 'results'])->name('matching.results');
+    Route::get('/candidate/{id}',    [CandidateResumeController::class, 'show'])->name('candidate.resume');
+
+    // Candidates
+    Route::get('/candidates', [CandidatesController::class, 'index'])->name('candidates.index');
+
+    // Settings
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+
+});

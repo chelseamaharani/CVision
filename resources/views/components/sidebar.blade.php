@@ -14,9 +14,9 @@
         </a>
 
         {{-- Post Job --}}
-        <a href="{{ route('jobs.create') }}"
+        <a href="{{ route('job_listing.create') }}"
            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150
-                  {{ request()->routeIs('jobs.create') ? 'bg-[#2D3799] text-white shadow-md' : 'text-white hover:bg-white/15' }}">
+                  {{ request()->routeIs('job_listing.create') ? 'bg-[#2D3799] text-white shadow-md' : 'text-white hover:bg-white/15' }}">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -26,9 +26,9 @@
         <div class="my-2 border-t border-white/20"></div>
 
         {{-- Job Listing --}}
-        <a href="{{ route('jobs.index') }}"
+        <a href="{{ route('job_listing.index') }}"
            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150
-                  {{ request()->routeIs('jobs.index') ? 'bg-[#2D3799] text-white shadow-md' : 'text-white hover:bg-white/15' }}">
+                  {{ request()->routeIs('job_listing.index') ? 'bg-[#2D3799] text-white shadow-md' : 'text-white hover:bg-white/15' }}">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
             </svg>
