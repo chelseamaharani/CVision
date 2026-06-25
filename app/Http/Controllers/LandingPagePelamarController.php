@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\UploadJob;
 
 class LandingPagePelamarController extends Controller
 {
@@ -13,14 +14,18 @@ class LandingPagePelamarController extends Controller
      */
     public function index()
     {
+        $jobs = UploadJob::orderBy('title')->get();
+
         $riwayatCv = [];
 
         if (Auth::check()) {
-            // Nanti ganti dengan query database:
-            // $riwayatCv = auth()->user()->cvs()->latest()->paginate(5);
+            $riwayatCv = auth()->user()->cvs()
+                ->with('uploadJob')
+                ->latest()
+                ->get();
         }
 
-        return view('pages.landing_page_pelamar', compact('riwayatCv'));
+        return view('pages.landing_page_pelamar', compact('jobs', 'riwayatCv'));
     }
 
     /**
@@ -29,19 +34,19 @@ class LandingPagePelamarController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'job_title' => 'required|string|max:255',
-            'cv_file'   => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB
+            'upload_job_id' => 'required|exists:upload_jobs,id',
+            'cv_file'       => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB
         ]);
 
         $path = $request->file('cv_file')->store('cv_uploads', 'public');
 
-        // auth()->user()->cvs()->create([
-        //     'job_title' => $request->job_title,
-        //     'file_path' => $path,
-        //     'file_name' => $request->file('cv_file')->getClientOriginalName(),
-        // ]);
+        auth()->user()->cvs()->create([
+            'upload_job_id' => $request->upload_job_id,
+            'file_path'     => $path,
+            'file_name'     => $request->file('cv_file')->getClientOriginalName(),
+        ]);
 
-        return back()->with('success', 'CV berhasil diupload!');
+        return back()->with('success', 'Your CV has been uploaded successfully!');
     }
 
     /**
@@ -49,10 +54,11 @@ class LandingPagePelamarController extends Controller
      */
     public function destroy($id)
     {
-        // $cv = auth()->user()->cvs()->findOrFail($id);
-        // Storage::disk('public')->delete($cv->file_path);
-        // $cv->delete();
+        $cv = auth()->user()->cvs()->findOrFail($id);
 
-        return back()->with('success', 'CV berhasil dihapus!');
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($cv->file_path);
+        $cv->delete();
+
+        return back()->with('success', 'CV deleted successfully.');
     }
 }

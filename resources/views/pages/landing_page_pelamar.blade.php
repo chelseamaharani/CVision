@@ -7,22 +7,22 @@
 <section class="bg-[#E8EAFF] px-8 py-12 md:py-16">
     <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-start">
 
-        {{-- ===================== KIRI: SAPAAN + INFO ===================== --}}
+        {{-- ===================== LEFT: GREETING + INFO ===================== --}}
         <div>
             <p class="text-gray-600 text-base mb-1">
-                Halo, {{ auth()->check() ? auth()->user()->name : 'Pelamar' }}
+                Hello, {{ auth()->check() ? auth()->user()->name : 'Applicant' }}
             </p>
 
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-1">
-                Siap untuk bekerja?
+                Ready to work?
             </h1>
             <h2 class="text-3xl md:text-4xl font-bold text-[#4B52B0] leading-tight mb-5">
-                Upload CV-mu disini!
+                Upload your CV here!
             </h2>
 
             <p class="text-gray-600 text-base leading-relaxed mb-8 max-w-lg">
-                Unggah CV terbaikmu dan temukan peluang kerja yang sesuai dengan kemampuanmu.
-                Sistem kami akan mencocokkan CV dengan lowongan yang paling relevan untukmu.
+                Upload your best CV and find job opportunities that match your skills.
+                Our system will match your CV with the most relevant job openings for you.
             </p>
 
             {{-- Feature Icons --}}
@@ -34,8 +34,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                     </div>
-                    <p class="text-[#4B52B0] font-semibold text-sm mb-1">Format PDF/DOCS</p>
-                    <p class="text-gray-500 text-xs leading-relaxed">Hanya file PDF atau DOC/DOCS</p>
+                    <p class="text-[#4B52B0] font-semibold text-sm mb-1">PDF/DOCX Format</p>
+                    <p class="text-gray-500 text-xs leading-relaxed">PDF or DOC/DOCX files only</p>
                 </div>
 
                 <div>
@@ -44,8 +44,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
                     </div>
-                    <p class="text-[#4B52B0] font-semibold text-sm mb-1">Aman & Terpecaya</p>
-                    <p class="text-gray-500 text-xs leading-relaxed">Data CV-mu aman dan terlindungi</p>
+                    <p class="text-[#4B52B0] font-semibold text-sm mb-1">Safe & Trusted</p>
+                    <p class="text-gray-500 text-xs leading-relaxed">Your CV data is safe and protected</p>
                 </div>
 
                 <div>
@@ -54,8 +54,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
                     </div>
-                    <p class="text-[#4B52B0] font-semibold text-sm mb-1">Proses Cepat</p>
-                    <p class="text-gray-500 text-xs leading-relaxed">Dapatkan rekomendasi dalam hitungan cepat</p>
+                    <p class="text-[#4B52B0] font-semibold text-sm mb-1">Fast Process</p>
+                    <p class="text-gray-500 text-xs leading-relaxed">Get recommendations in no time</p>
                 </div>
 
             </div>
@@ -63,12 +63,12 @@
             {{-- Tips Box --}}
             <div class="bg-[#7B82C9] text-white rounded-xl px-6 py-4 max-w-md">
                 <p class="text-sm font-medium leading-relaxed">
-                    <span class="font-bold">Tips :</span> Pastikan CV-mu terbaru dan informatif agar peluangmu semakin besar!
+                    <span class="font-bold">Tip:</span> Make sure your CV is up to date and informative to increase your chances!
                 </p>
             </div>
         </div>
 
-        {{-- ===================== KANAN: CARD UPLOAD/RIWAYAT ===================== --}}
+        {{-- ===================== RIGHT: UPLOAD/HISTORY CARD ===================== --}}
         <div class="bg-white rounded-2xl shadow-md p-8">
 
             {{-- Tabs --}}
@@ -77,11 +77,27 @@
                         class="flex-1 text-center pb-3 font-semibold text-sm text-[#4B52B0] border-b-2 border-[#4B52B0] transition-colors">
                     Upload CV
                 </button>
-                <button type="button" onclick="switchTab('riwayat')" id="tabRiwayatBtn"
+                <button type="button" onclick="switchTab('history')" id="tabHistoryBtn"
                         class="flex-1 text-center pb-3 font-semibold text-sm text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition-colors">
-                    Riwayat CV
+                    CV History
                 </button>
             </div>
+
+            {{-- Success / Error messages --}}
+            @if(session('success'))
+            <div class="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-xl mb-5 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                {{ session('success') }}
+            </div>
+            @endif
+
+            @if($errors->any())
+            <div class="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl mb-5">
+                {{ $errors->first() }}
+            </div>
+            @endif
 
             {{-- ============ TAB: UPLOAD CV ============ --}}
             <div id="tabUpload">
@@ -89,13 +105,28 @@
                 <form action="{{ route('cv.store') }}" method="POST" enctype="multipart/form-data" id="uploadCvForm">
                     @csrf
 
-                    {{-- Posisi yang Dilamar --}}
+                    {{-- Position Applied --}}
                     <div class="mb-5">
-                        <label class="block font-semibold text-gray-800 mb-2 text-sm">Posisi yang Dilamar</label>
-                        <input type="text" name="job_title" value="{{ old('job_title') }}"
-                               placeholder="Tulis posisi yang dilamar"
-                               class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4B52B0]/30 transition">
-                        @error('job_title')
+                        <label class="block font-semibold text-gray-800 mb-2 text-sm">Position Applied</label>
+                        <div class="relative">
+                            <select name="upload_job_id"
+                                    class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-[#4B52B0]/30 transition cursor-pointer">
+                                <option value="" disabled selected>Select the position you're applying for</option>
+                                @forelse($jobs ?? [] as $job)
+                                    <option value="{{ $job->id }}" {{ old('upload_job_id') == $job->id ? 'selected' : '' }}>
+                                        {{ $job->title }}
+                                    </option>
+                                @empty
+                                    <option value="" disabled>No job openings available yet</option>
+                                @endforelse
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </div>
+                        @error('upload_job_id')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
@@ -104,21 +135,21 @@
                     <div class="mb-5">
                         <label class="block font-semibold text-gray-800 mb-2 text-sm">Upload CV</label>
 
-                        {{-- Dropzone (sebelum file dipilih) --}}
+                        {{-- Dropzone (before file selected) --}}
                         <label for="cvFileInput" id="dropzone"
                                class="cursor-pointer flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-300 rounded-xl py-10 px-4 hover:border-[#4B52B0] hover:bg-[#F5F6FF] transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                             </svg>
                             <p class="text-sm text-gray-700 mb-1">
-                                Drag dan drop <span class="text-[#4B52B0] font-semibold">file CV</span> kamu disini
-                                <br>atau klik untuk memilih file
+                                Drag and drop your <span class="text-[#4B52B0] font-semibold">CV file</span> here
+                                <br>or click to browse
                             </p>
-                            <p class="text-xs text-gray-400 mt-2">Format yang didukung: PDF, DOC, DOCS</p>
-                            <p class="text-xs text-gray-400">Maksimal ukuran file 5MB</p>
+                            <p class="text-xs text-gray-400 mt-2">Supported formats: PDF, DOC, DOCX</p>
+                            <p class="text-xs text-gray-400">Maximum file size 5MB</p>
                         </label>
 
-                        {{-- File preview (setelah file dipilih) --}}
+                        {{-- File preview (after file selected) --}}
                         <div id="filePreview" class="hidden border border-gray-200 rounded-xl px-4 py-3 flex items-center gap-3">
                             <div class="w-9 h-9 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -142,9 +173,8 @@
                         @enderror
                     </div>
 
-                    {{-- Simpan CV --}}
+                    {{-- Submit --}}
                     @guest
-                        {{-- Belum login: arahkan ke halaman login, bukan submit form --}}
                         <a href="{{ route('login') }}"
                            class="w-full bg-[#3B44A9] hover:bg-[#2F3890] text-white font-semibold text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -165,107 +195,89 @@
                 </form>
             </div>
 
-            {{-- ============ TAB: RIWAYAT CV ============ --}}
-            <div id="tabRiwayat" class="hidden">
+            {{-- ============ TAB: CV HISTORY ============ --}}
+            <div id="tabHistory" class="hidden">
 
                 @guest
-                    {{-- Belum login: tampil pesan, bukan list riwayat --}}
                     <div class="text-center py-16">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
-                        <p class="text-gray-500 text-sm mb-4">Login dulu untuk melihat riwayat CV kamu.</p>
+                        <p class="text-gray-500 text-sm mb-4">Log in to view your CV history.</p>
                         <a href="{{ route('login') }}"
                            class="inline-flex items-center gap-2 bg-[#3B44A9] hover:bg-[#2F3890] text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition-colors">
-                            Login Sekarang
+                            Login Now
                         </a>
                     </div>
                 @else
 
                 <div class="flex items-center justify-between mb-1">
                     <div>
-                        <h3 class="font-semibold text-gray-800 text-base">Riwayat CV yang Diunggah</h3>
-                        <p class="text-gray-400 text-xs mt-0.5">Kelola CV yang pernah kamu unggah disini.</p>
+                        <h3 class="font-semibold text-gray-800 text-base">Uploaded CV History</h3>
+                        <p class="text-gray-400 text-xs mt-0.5">Manage the CVs you've previously uploaded here.</p>
                     </div>
                     <button type="button" onclick="switchTab('upload')"
                             class="flex items-center gap-1.5 bg-[#3B44A9] hover:bg-[#2F3890] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Upload CV Baru
+                        Upload New CV
                     </button>
                 </div>
 
                 <div class="mt-5 flex flex-col gap-3">
 
-                    @php
-                    $riwayatCv = $riwayatCv ?? [
-                        ['posisi'=>'Frontend Developer','filename'=>'CV_Salsabila.pdf','tipe'=>'pdf','tanggal'=>'12 Juni 2024','jam'=>'10:30 WIB'],
-                        ['posisi'=>'UI/UX Designer','filename'=>'CV_Salsabila_UIUX.docx','tipe'=>'doc','tanggal'=>'28 Mei 2024','jam'=>'14:20 WIB'],
-                        ['posisi'=>'Data Analyst','filename'=>'CV_Salsabila_Data.pdf','tipe'=>'pdf','tanggal'=>'15 Mei 2024','jam'=>'09:15 WIB'],
-                    ];
-                    @endphp
-
                     @forelse($riwayatCv as $cv)
                     <div class="flex items-center gap-3 border border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50 transition-colors">
 
-                        {{-- Icon file --}}
-                        <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 {{ $cv['tipe'] === 'pdf' ? 'bg-red-50' : 'bg-blue-50' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ $cv['tipe'] === 'pdf' ? 'text-red-500' : 'text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        {{-- File icon --}}
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 {{ str_ends_with(strtolower($cv->file_name), '.pdf') ? 'bg-red-50' : 'bg-blue-50' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ str_ends_with(strtolower($cv->file_name), '.pdf') ? 'text-red-500' : 'text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
 
                         {{-- Info --}}
                         <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-gray-800 text-sm truncate">{{ $cv['posisi'] }}</p>
-                            <p class="text-gray-400 text-xs truncate">{{ $cv['filename'] }}</p>
+                            <p class="font-semibold text-gray-800 text-sm truncate">{{ $cv->uploadJob->title ?? 'Unknown Position' }}</p>
+                            <p class="text-gray-400 text-xs truncate">{{ $cv->file_name }}</p>
                         </div>
 
-                        {{-- Tanggal --}}
+                        {{-- Date --}}
                         <div class="hidden sm:flex items-center gap-1.5 text-gray-400 text-xs flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            <span>{{ $cv['tanggal'] }}<br>{{ $cv['jam'] }}</span>
+                            <span>{{ $cv->created_at->format('M d, Y') }}<br>{{ $cv->created_at->format('H:i') }}</span>
                         </div>
 
                         {{-- Actions --}}
                         <div class="flex items-center gap-2 flex-shrink-0">
-                            <button type="button" class="flex items-center gap-1 text-[#4B52B0] text-xs font-semibold hover:underline">
+                            <a href="{{ asset('storage/' . $cv->file_path) }}" target="_blank"
+                               class="flex items-center gap-1 text-[#4B52B0] text-xs font-semibold hover:underline">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                 </svg>
-                                Edit
-                            </button>
-                            <button type="button" class="flex items-center gap-1 text-red-500 text-xs font-semibold hover:underline">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                Hapus
-                            </button>
+                                View
+                            </a>
+                            <form action="{{ route('cv.destroy', $cv->id) }}" method="POST" onsubmit="return confirm('Delete this CV?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="flex items-center gap-1 text-red-500 text-xs font-semibold hover:underline">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Delete
+                                </button>
+                            </form>
                         </div>
 
                     </div>
                     @empty
-                    <p class="text-center text-gray-400 text-sm py-10">Belum ada CV yang diunggah.</p>
+                    <p class="text-center text-gray-400 text-sm py-10">No CVs uploaded yet.</p>
                     @endforelse
 
-                </div>
-
-                {{-- Pagination --}}
-                <div class="flex justify-center items-center gap-2 mt-6">
-                    <button class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </button>
-                    <span class="w-7 h-7 flex items-center justify-center bg-[#3B44A9] text-white text-xs font-semibold rounded-lg">1</span>
-                    <button class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </button>
                 </div>
 
                 @endguest
@@ -283,23 +295,23 @@
 <script>
     // ===== Tab Switching =====
     function switchTab(tab) {
-        const uploadTab   = document.getElementById('tabUpload');
-        const riwayatTab  = document.getElementById('tabRiwayat');
-        const uploadBtn   = document.getElementById('tabUploadBtn');
-        const riwayatBtn  = document.getElementById('tabRiwayatBtn');
+        const uploadTab  = document.getElementById('tabUpload');
+        const historyTab = document.getElementById('tabHistory');
+        const uploadBtn  = document.getElementById('tabUploadBtn');
+        const historyBtn = document.getElementById('tabHistoryBtn');
 
         if (tab === 'upload') {
             uploadTab.classList.remove('hidden');
-            riwayatTab.classList.add('hidden');
+            historyTab.classList.add('hidden');
             uploadBtn.classList.add('text-[#4B52B0]', 'border-[#4B52B0]');
             uploadBtn.classList.remove('text-gray-400', 'border-transparent');
-            riwayatBtn.classList.remove('text-[#4B52B0]', 'border-[#4B52B0]');
-            riwayatBtn.classList.add('text-gray-400', 'border-transparent');
+            historyBtn.classList.remove('text-[#4B52B0]', 'border-[#4B52B0]');
+            historyBtn.classList.add('text-gray-400', 'border-transparent');
         } else {
-            riwayatTab.classList.remove('hidden');
+            historyTab.classList.remove('hidden');
             uploadTab.classList.add('hidden');
-            riwayatBtn.classList.add('text-[#4B52B0]', 'border-[#4B52B0]');
-            riwayatBtn.classList.remove('text-gray-400', 'border-transparent');
+            historyBtn.classList.add('text-[#4B52B0]', 'border-[#4B52B0]');
+            historyBtn.classList.remove('text-gray-400', 'border-transparent');
             uploadBtn.classList.remove('text-[#4B52B0]', 'border-[#4B52B0]');
             uploadBtn.classList.add('text-gray-400', 'border-transparent');
         }
@@ -307,10 +319,10 @@
 
     // ===== File Upload Preview =====
     const cvFileInput = document.getElementById('cvFileInput');
-    const dropzone     = document.getElementById('dropzone');
-    const filePreview  = document.getElementById('filePreview');
-    const fileName     = document.getElementById('fileName');
-    const fileSize      = document.getElementById('fileSize');
+    const dropzone    = document.getElementById('dropzone');
+    const filePreview = document.getElementById('filePreview');
+    const fileNameEl  = document.getElementById('fileName');
+    const fileSizeEl  = document.getElementById('fileSize');
 
     cvFileInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
@@ -319,8 +331,8 @@
     });
 
     function showFilePreview(file) {
-        fileName.textContent = file.name;
-        fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+        fileNameEl.textContent = file.name;
+        fileSizeEl.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
         dropzone.classList.add('hidden');
         filePreview.classList.remove('hidden');
     }

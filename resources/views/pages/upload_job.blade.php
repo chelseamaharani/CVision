@@ -7,6 +7,12 @@
 {{-- Judul --}}
 <h1 class="text-2xl font-bold text-[#7B82C9] text-center mb-6">Upload New Job</h1>
 
+@if(session('success'))
+<div class="max-w-3xl mx-auto mb-4 bg-green-100 text-green-700 text-sm px-4 py-3 rounded-xl text-center">
+    {{ session('success') }}
+</div>
+@endif
+
 <form action="{{ route('job_listing.store') }}" method="POST" id="uploadJobForm">
     @csrf
 
@@ -134,11 +140,11 @@
             @enderror
         </div>
 
-        {{-- Tombol NEXT --}}
+        {{-- Tombol Submit --}}
         <div class="flex justify-end pt-2">
             <button type="submit"
-                    class="bg-white hover:bg-gray-50 text-gray-600 font-semibold text-sm px-10 py-2.5 rounded-xl shadow-sm border border-gray-200 transition-colors">
-                NEXT
+                    class="bg-[#2D3799] hover:bg-[#232d85] text-white font-semibold text-sm px-10 py-2.5 rounded-xl shadow-sm transition-colors">
+                Post Job
             </button>
         </div>
 
@@ -202,5 +208,13 @@
             otherInput.value = '';
         }
     }
+
+    // ===== Reset form setelah submit berhasil =====
+    @if(session('success'))
+        document.getElementById('uploadJobForm').reset();
+        skills = [];
+        renderTags();
+        skillsHidden.value = '';
+    @endif
 </script>
 @endpush

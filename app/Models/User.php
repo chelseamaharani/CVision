@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -28,5 +29,21 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * CV yang diupload user ini (kalau dia pelamar)
+     */
+    public function cvs(): HasMany
+    {
+        return $this->hasMany(Cv::class);
+    }
+
+    /**
+     * Job yang diposting user ini (kalau dia HRD/admin)
+     */
+    public function uploadJobs(): HasMany
+    {
+        return $this->hasMany(UploadJob::class);
     }
 }

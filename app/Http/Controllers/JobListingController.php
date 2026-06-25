@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\UploadJob;
 
 class JobListingController extends Controller
 {
@@ -11,10 +12,18 @@ class JobListingController extends Controller
      */
     public function index()
     {
-        // Nanti ganti dengan query database:
-        // $jobsList = Job::withCount('applicants')->get();
+        $jobsList = UploadJob::withCount('cvs')
+            ->latest()
+            ->get()
+            ->map(function ($job) {
+                return [
+                    'id'         => $job->id,
+                    'title'      => $job->title,
+                    'applicants' => $job->cvs_count,
+                ];
+            });
 
-        return view('pages.job_listing');
+        return view('pages.job_listing', compact('jobsList'));
     }
 
     /**
@@ -44,16 +53,18 @@ class JobListingController extends Controller
             ? $request->job_category_other
             : $request->job_category;
 
-        // Job::create([
-        //     'title'             => $request->job_title,
-        //     'category'          => $category,
-        //     'description'       => $request->job_description,
-        //     'required_skills'   => $request->required_skills,
-        //     'min_experience'    => $request->min_experience,
-        //     'education'         => $request->education_requirement,
-        // ]);
+        UploadJob::create([
+            'user_id'                => auth()->id(),
+            'title'                  => $request->job_title,
+            'category'               => $category,
+            'description'            => $request->job_description,
+            'required_skills'        => $request->required_skills,
+            'min_experience'         => $request->min_experience,
+            'education_requirement'  => $request->education_requirement,
+        ]);
 
-        return redirect()->route('job_listing.index')->with('success', 'Job posted successfully!');
+        // Tetap di halaman Post Job (form kosong lagi), bukan redirect ke Job Listing
+        return back()->with('success', 'Job posted successfully!');
     }
 
     /**
@@ -61,8 +72,8 @@ class JobListingController extends Controller
      */
     public function screen(Request $request, $jobId)
     {
-        // $job        = Job::findOrFail($jobId);
-        // $candidates = Cv::where('job_id', $jobId)->get();
+        // $job        = UploadJob::findOrFail($jobId);
+        // $candidates = Cv::where('upload_job_id', $jobId)->get();
         // ... proses AI matching ...
         // MatchingResult::create([...]);
 
