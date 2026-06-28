@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cv;
+
 class CandidatesController extends Controller
 {
     /**
@@ -9,16 +11,18 @@ class CandidatesController extends Controller
      */
     public function index()
     {
-        // Nanti ganti dengan query database:
-        // $candidatesList = Cv::with('user', 'job')->get()->map(function ($cv) {
-        //     return [
-        //         'id'       => $cv->id,
-        //         'name'     => $cv->user->name,
-        //         'position' => $cv->job_title,
-        //         'cv_path'  => $cv->file_path,
-        //     ];
-        // });
+        $candidatesList = Cv::with('user', 'uploadJob')
+            ->latest()
+            ->get()
+            ->map(function ($cv) {
+                return [
+                    'id'       => $cv->id,
+                    'name'     => $cv->user->name ?? 'Unknown',
+                    'position' => $cv->uploadJob->title ?? 'Unknown Position',
+                    'cv_path'  => $cv->file_path,
+                ];
+            });
 
-        return view('pages.candidates');
+        return view('pages.candidates', compact('candidatesList'));
     }
 }

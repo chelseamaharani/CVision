@@ -8,11 +8,17 @@ use Illuminate\Support\Facades\Hash;
 
 class SettingsController extends Controller
 {
+    /**
+     * Tampilkan halaman Settings (profil HRD)
+     */
     public function index()
     {
         return view('pages.settings');
     }
 
+    /**
+     * Update nama, email, dan/atau password HRD
+     */
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -22,28 +28,23 @@ class SettingsController extends Controller
             'email'        => 'required|email|unique:users,email,' . $user->id,
             'old_password' => 'nullable|string',
             'new_password' => 'nullable|string|min:8',
-            'avatar'       => 'nullable|image|max:2048',
         ]);
 
         $user->name  = $request->name;
         $user->email = $request->email;
 
-        // Ganti password jika diisi
+        // Ganti password hanya jika kedua field diisi
         if ($request->filled('old_password') && $request->filled('new_password')) {
             if (!Hash::check($request->old_password, $user->password)) {
-                return back()->withErrors(['old_password' => 'Password lama tidak sesuai.']);
+                return back()->withErrors([
+                    'old_password' => 'The old password you entered is incorrect.',
+                ]);
             }
             $user->password = Hash::make($request->new_password);
         }
 
-        // Upload avatar jika ada
-        if ($request->hasFile('avatar')) {
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $user->avatar = $path;
-        }
-
         $user->save();
 
-        return back()->with('success', 'Perubahan berhasil disimpan!');
+        return back()->with('success', 'Changes saved successfully!');
     }
 }
