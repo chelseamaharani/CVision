@@ -68,14 +68,72 @@ class JobListingController extends Controller
     }
 
     /**
-     * Proses screening AI untuk satu job (dipanggil dari modal "Start Screening")
+     * Proses screening untuk satu job (dipanggil dari modal "Start Screening")
+     *
+     * SAAT INI: pakai skor random sebagai placeholder, supaya alur Job Listing ->
+     * Matching History -> Matching Results -> Candidate Resume bisa berjalan utuh
+     * tanpa menunggu model AI.
+     *
+     * NANTI: ganti bagian "TODO: INTEGRASI AI" di bawah dengan panggilan ke API/model
+     * AI temanmu. Yang penting outputnya tetap diisi ke kolom yang sama di MatchingResult.
      */
     public function screen(Request $request, $jobId)
     {
-        // $job        = UploadJob::findOrFail($jobId);
-        // $candidates = Cv::where('upload_job_id', $jobId)->get();
-        // ... proses AI matching ...
-        // MatchingResult::create([...]);
+        $job = UploadJob::findOrFail($jobId);
+        $cvs = $job->cvs;
+
+        if ($cvs->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No CVs found for this job yet.',
+            ], 422);
+        }
+
+        foreach ($cvs as $cv) {
+            // ===================== TODO: INTEGRASI AI =====================
+            // Ganti baris-baris di bawah ini dengan hasil asli dari model AI.
+            // Kirim $cv->file_path dan $job->required_skills (atau data lain
+            // yang dibutuhkan) ke API/model, lalu ambil hasilnya untuk diisi
+            // ke variabel-variabel berikut:
+
+            $score           = rand(60, 95);
+            $skillsArray     = $job->skills_array;             // dari helper di model UploadJob
+            $skillsTotal     = count($skillsArray);
+            $skillsCount     = rand(1, max(1, $skillsTotal));
+            $skillsMatched   = array_slice($skillsArray, 0, $skillsCount);
+            $status          = $score >= 80 ? 'Highly Match' : ($score >= 60 ? 'Good Match' : 'Low Match');
+            $similarityScore = round($score / 100, 2);
+            $recommendation  = "Candidate shows {$status} based on skill and experience alignment with this position.";
+
+            // ===================== AKHIR TODO =====================
+
+            \App\Models\MatchingResult::updateOrCreate(
+                [
+                    'upload_job_id' => $job->id,
+                    'cv_id'         => $cv->id,
+                ],
+                [
+                    'score'            => $score,
+                    'status'           => $status,
+                    'skills_matched'   => $skillsMatched,
+                    'skills_total'     => $skillsTotal,
+                    'skills_count'     => $skillsCount,
+                    'skill_gap'        => $skillsTotal > $skillsCount
+                        ? implode(', ', array_slice($skillsArray, $skillsCount)) . ' = ' . ($skillsTotal - $skillsCount) . ' skill gap'
+                        : 'No skill gap',
+                    'experience_years' => $job->min_experience,
+                    'education_match'  => $job->education_requirement,
+                    'similarity_score' => $similarityScore,
+                    'recommendation'   => $recommendation,
+                ]
+            );
+        }
+
+        // Hitung ulang rank berdasarkan score tertinggi
+        $results = $job->matchingResults()->get(); // sudah orderByDesc('score') dari relasi
+        foreach ($results as $index => $result) {
+            $result->update(['rank' => $index + 1]);
+        }
 
         return response()->json([
             'success' => true,

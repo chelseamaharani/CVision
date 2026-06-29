@@ -208,13 +208,24 @@ $candidate = $candidate ?? [
 <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
     <div class="flex items-center justify-between mb-4">
         <h3 class="font-bold text-gray-900 text-lg">Experience</h3>
+        @if(!empty($candidate['experience']))
         <a href="#" class="text-[#4B52B0] text-sm font-semibold hover:underline flex items-center gap-1">
             View Full Story
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
         </a>
+        @endif
     </div>
+
+    @if(empty($candidate['experience']))
+        <div class="text-center py-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            <p class="text-gray-400 text-sm">Work experience details have not been extracted from this CV yet.</p>
+        </div>
+    @endif
 
     @foreach($candidate['experience'] as $exp)
     <div class="flex gap-4 {{ !$loop->last ? 'mb-6' : '' }}">

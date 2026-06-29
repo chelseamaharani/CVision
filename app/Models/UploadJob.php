@@ -45,6 +45,14 @@ class UploadJob extends Model
     }
 
     /**
+     * Hasil screening AI untuk job ini
+     */
+    public function matchingResults(): HasMany
+    {
+        return $this->hasMany(MatchingResult::class, 'upload_job_id')->orderByDesc('score');
+    }
+
+    /**
      * Helper: ambil required_skills sebagai array
      * Contoh: "Python,SQL,REST API" -> ['Python', 'SQL', 'REST API']
      */

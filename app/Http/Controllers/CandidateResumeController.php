@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MatchingResult;
+
 class CandidateResumeController extends Controller
 {
     /**
@@ -10,20 +12,33 @@ class CandidateResumeController extends Controller
      */
     public function show($id)
     {
-        // Nanti ganti dengan query database:
-        // $result    = MatchingResult::with('candidate', 'job')->findOrFail($id);
-        // $candidate = [
-        //     'name'       => $result->candidate->name,
-        //     'position'   => $result->job->title,
-        //     'cv_id'      => $result->candidate->cv_code,
-        //     'email'      => $result->candidate->email,
-        //     'phone'      => $result->candidate->phone,
-        //     'location'   => $result->candidate->location,
-        //     'score'      => $result->score,
-        //     'rank'       => $result->rank,
-        //     ... dst sesuai field yang ada di database
-        // ];
+        $result = MatchingResult::with('cv.user', 'uploadJob')->findOrFail($id);
 
-        return view('pages.candidate_resume');
+        $name = $result->cv->user->name ?? 'Unknown';
+
+        $candidate = [
+            'name'             => $name,
+            'position'         => $result->uploadJob->title ?? '',
+            'cv_id'            => 'CV-' . now()->format('Y') . '-' . str_pad($result->cv_id, 5, '0', STR_PAD_LEFT),
+            'email'            => $result->cv->user->email ?? '-',
+            'phone'            => '-', // Belum ada sumbernya — nanti diisi otomatis oleh AI dari hasil parsing CV
+            'location'         => '-', // Belum ada sumbernya — nanti diisi otomatis oleh AI dari hasil parsing CV
+            'score'            => $result->score,
+            'rank'             => $result->rank,
+            'status'           => $result->status,
+            'percentile'       => '',
+            'skills_matched'   => $result->skills_matched ?? [],
+            'skills_total'     => $result->skills_total ?? 0,
+            'skills_count'     => $result->skills_count ?? 0,
+            'skill_gap'        => $result->skill_gap,
+            'experience_years' => $result->experience_years,
+            'education'        => $result->education_match,
+            'similarity'       => $result->similarity_score,
+            'cv_path'          => $result->cv->file_path,
+            'experience'       => [], // belum ada sumber data riwayat pekerjaan terstruktur
+            'recommendation'   => $result->recommendation,
+        ];
+
+        return view('pages.candidate_resume', compact('candidate'));
     }
 }

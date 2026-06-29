@@ -199,15 +199,28 @@
         document.getElementById('confirmModal').classList.add('hidden');
         document.getElementById('loadingModal').classList.remove('hidden');
 
-        // Simulasi proses screening AI (nanti diganti dengan AJAX call ke backend)
-        // fetch(`/jobs/${currentJobId}/screen`, { method: 'POST', headers: {...} })
-        //     .then(res => res.json())
-        //     .then(data => { ... });
+        fetch(`/job_listing/${currentJobId}/screen`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                    || '{{ csrf_token() }}',
+            },
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loadingModal').classList.add('hidden');
 
-        setTimeout(function() {
-            document.getElementById('loadingModal').classList.add('hidden');
-            document.getElementById('successModal').classList.remove('hidden');
-        }, 2500);
+                if (data.success) {
+                    document.getElementById('successModal').classList.remove('hidden');
+                } else {
+                    alert(data.message || 'Screening failed. Please try again.');
+                }
+            })
+            .catch(() => {
+                document.getElementById('loadingModal').classList.add('hidden');
+                alert('Something went wrong. Please try again.');
+            });
     }
 
     // ===== View Results: redirect ke halaman Matching Results =====
