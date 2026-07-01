@@ -20,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'experience_years',
     'education_match',
     'similarity_score',
+    'tfidf_score',
+    'sbert_score',
+    'hybrid_score',
     'recommendation',
 ])]
 class MatchingResult extends Model
@@ -29,8 +32,14 @@ class MatchingResult extends Model
     protected function casts(): array
     {
         return [
-            'skills_matched'   => 'array',  // otomatis convert JSON <-> array PHP
+            'skills_matched'   => 'array',
+            'skill_gap'        => 'array',
             'similarity_score' => 'float',
+            'score'            => 'float',
+            'tfidf_score'      => 'float',
+            'sbert_score'      => 'float',
+            'hybrid_score'     => 'float',
+            'experience_years' => 'float',
         ];
     }
 

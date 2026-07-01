@@ -10,6 +10,7 @@ use App\Http\Controllers\MatchingController;
 use App\Http\Controllers\CandidatesController;
 use App\Http\Controllers\CandidateResumeController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ScreeningController;
 
 // ===== AUTH =====
 Route::get('/login',    [LoginController::class, 'index'])->name('login');
@@ -46,6 +47,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/matching',          [MatchingController::class, 'index'])->name('matching.index');
     Route::get('/matching_results',  [MatchingController::class, 'results'])->name('matching.results');
     Route::get('/candidate/{id}',    [CandidateResumeController::class, 'show'])->name('candidate.resume');
+
+    // Per-CV Screening
+    Route::get('/screening/{jobId}',           [ScreeningController::class, 'index'])->name('screening.index');
+    Route::post('/screening/{cvId}/screen',    [ScreeningController::class, 'screenSingle'])->name('screening.screen');
+    Route::post('/screening/{jobId}/screen-all', [ScreeningController::class, 'screenAll'])->name('screening.screenAll');
 
     // Candidates
     Route::get('/candidates', [CandidatesController::class, 'index'])->name('candidates.index');

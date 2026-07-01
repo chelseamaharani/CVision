@@ -40,7 +40,7 @@
     </div>
 </div>
 
-{{-- Stats Cards --}}
+{{-- Stats Cards with Real AI Data --}}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 mt-6">
 
     {{-- Matches --}}
@@ -51,8 +51,8 @@
             </svg>
         </div>
         <div>
-            <p class="text-xs text-gray-400 font-medium">Matches</p>
-            <p class="text-lg font-bold text-gray-800 leading-tight">{{ $stats['matches'] ?? 5 }}</p>
+            <p class="text-xs text-gray-400 font-medium">Processed</p>
+            <p class="text-lg font-bold text-gray-800 leading-tight">{{ $stats['matches'] }}</p>
         </div>
     </div>
 
@@ -64,12 +64,12 @@
             </svg>
         </div>
         <div>
-            <p class="text-xs text-gray-400 font-medium">Candidates</p>
-            <p class="text-lg font-bold text-gray-800 leading-tight">{{ $stats['candidates'] ?? 20 }}</p>
+            <p class="text-xs text-gray-400 font-medium">Total Applicants</p>
+            <p class="text-lg font-bold text-gray-800 leading-tight">{{ $stats['candidates'] }}</p>
         </div>
     </div>
 
-    {{-- Matching Accuracy --}}
+    {{-- Average Score --}}
     <div class="bg-white rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm">
         <div class="w-9 h-9 rounded-lg bg-yellow-100 flex items-center justify-center flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,21 +77,21 @@
             </svg>
         </div>
         <div>
-            <p class="text-xs text-gray-400 font-medium">Matching Accuracy</p>
-            <p class="text-lg font-bold text-gray-800 leading-tight">{{ $stats['accuracy'] ?? '82%' }}</p>
+            <p class="text-xs text-gray-400 font-medium">Avg. AI Score</p>
+            <p class="text-lg font-bold text-gray-800 leading-tight">{{ $stats['accuracy'] }}</p>
         </div>
     </div>
 
-    {{-- Date Matched --}}
+    {{-- Top Score --}}
     <div class="bg-white rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm">
         <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
             </svg>
         </div>
         <div>
-            <p class="text-xs text-gray-400 font-medium">Date Matched</p>
-            <p class="text-sm font-bold text-gray-800 leading-tight">{{ $stats['date'] ?? 'Apr 16, 2026' }}</p>
+            <p class="text-xs text-gray-400 font-medium">Top Score</p>
+            <p class="text-lg font-bold text-gray-800 leading-tight">{{ $stats['top_score'] }}</p>
         </div>
     </div>
 
@@ -197,7 +197,7 @@
 
             {{-- Skills --}}
             <div class="col-span-2 flex flex-col gap-1">
-                @foreach($c['skills'] as $skill)
+                @foreach($c['skills_matched'] as $skill)
                 <span class="inline-block bg-[#E8EAFF] text-[#4B52B0] text-xs font-medium px-2.5 py-0.5 rounded-full w-fit">{{ $skill }}</span>
                 @endforeach
             </div>

@@ -2,11 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Jobs\ProcessCVJob;
 use App\Models\UploadJob;
+use App\Services\AIService;
+use App\Services\CVExtractionService;
+use App\Services\CVScoreService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class JobListingController extends Controller
 {
+    public function __construct(
+        private readonly CVScoreService $cvScoreService,
+        private readonly AIService $aiService,
+    ) {}
+
     /**
      * Tampilkan halaman Job Listing (daftar posisi + tombol screening)
      */
@@ -63,19 +73,12 @@ class JobListingController extends Controller
             'education_requirement'  => $request->education_requirement,
         ]);
 
-        // Tetap di halaman Post Job (form kosong lagi), bukan redirect ke Job Listing
         return back()->with('success', 'Job posted successfully!');
     }
 
     /**
-     * Proses screening untuk satu job (dipanggil dari modal "Start Screening")
-     *
-     * SAAT INI: pakai skor random sebagai placeholder, supaya alur Job Listing ->
-     * Matching History -> Matching Results -> Candidate Resume bisa berjalan utuh
-     * tanpa menunggu model AI.
-     *
-     * NANTI: ganti bagian "TODO: INTEGRASI AI" di bawah dengan panggilan ke API/model
-     * AI temanmu. Yang penting outputnya tetap diisi ke kolom yang sama di MatchingResult.
+     * Proses screening untuk satu job menggunakan AI Engine (FastAPI)
+     * Dipanggil dari modal "Start Screening" di halaman Job Listing
      */
     public function screen(Request $request, $jobId)
     {
@@ -89,56 +92,63 @@ class JobListingController extends Controller
             ], 422);
         }
 
-        foreach ($cvs as $cv) {
-            // ===================== TODO: INTEGRASI AI =====================
-            // Ganti baris-baris di bawah ini dengan hasil asli dari model AI.
-            // Kirim $cv->file_path dan $job->required_skills (atau data lain
-            // yang dibutuhkan) ke API/model, lalu ambil hasilnya untuk diisi
-            // ke variabel-variabel berikut:
+        // Cek apakah AI Engine (FastAPI) sedang berjalan
+        if (!$this->aiService->isHealthy()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'AI Engine is not running. Please start it first: cd python && uvicorn main:app --reload --port 8000',
+            ], 503);
+        }
 
-            $score           = rand(60, 95);
-            $skillsArray     = $job->skills_array;             // dari helper di model UploadJob
-            $skillsTotal     = count($skillsArray);
-            $skillsCount     = rand(1, max(1, $skillsTotal));
-            $skillsMatched   = array_slice($skillsArray, 0, $skillsCount);
-            $status          = $score >= 80 ? 'Highly Match' : ($score >= 60 ? 'Good Match' : 'Low Match');
-            $similarityScore = round($score / 100, 2);
-            $recommendation  = "Candidate shows {$status} based on skill and experience alignment with this position.";
+        $processed = 0;
+        $failed = 0;
+        $totalCvs = $cvs->count();
 
-            // ===================== AKHIR TODO =====================
+        foreach ($cvs as $index => $cv) {
+            try {
+                // Proses CV via AI Engine satu per satu dengan jeda
+                // agar tidak membanjiri API Gemini (rate limiting)
+                Log::info("Screening CV {$index}/{$totalCvs}: CV #{$cv->id}");
 
-            \App\Models\MatchingResult::updateOrCreate(
-                [
-                    'upload_job_id' => $job->id,
-                    'cv_id'         => $cv->id,
-                ],
-                [
-                    'score'            => $score,
-                    'status'           => $status,
-                    'skills_matched'   => $skillsMatched,
-                    'skills_total'     => $skillsTotal,
-                    'skills_count'     => $skillsCount,
-                    'skill_gap'        => $skillsTotal > $skillsCount
-                        ? implode(', ', array_slice($skillsArray, $skillsCount)) . ' = ' . ($skillsTotal - $skillsCount) . ' skill gap'
-                        : 'No skill gap',
-                    'experience_years' => $job->min_experience,
-                    'education_match'  => $job->education_requirement,
-                    'similarity_score' => $similarityScore,
-                    'recommendation'   => $recommendation,
-                ]
-            );
+                ProcessCVJob::dispatchSync($cv);
+                $processed++;
+
+                // JEDA antar CV: 5 detik untuk memberi waktu Gemini API pulih
+                // Kecuali untuk CV terakhir, tidak perlu jeda
+                if ($index < $totalCvs - 1) {
+                    Log::info("Waiting 5 seconds before processing next CV...");
+                    sleep(5);
+                }
+
+            } catch (\Throwable $e) {
+                Log::error("Screening failed for CV #{$cv->id}: {$e->getMessage()}");
+                $failed++;
+            }
         }
 
         // Hitung ulang rank berdasarkan score tertinggi
-        $results = $job->matchingResults()->get(); // sudah orderByDesc('score') dari relasi
-        foreach ($results as $index => $result) {
-            $result->update(['rank' => $index + 1]);
+        $results = $job->matchingResults()->get();
+        $rankScores = $results->pluck('score', 'id')->toArray();
+        arsort($rankScores);
+        $rank = 1;
+        foreach (array_keys($rankScores) as $id) {
+            $results->find($id)->update(['rank' => $rank++]);
+        }
+
+        $message = "Screening completed. {$processed} CV(s) processed successfully.";
+        if ($failed > 0) {
+            $message .= " {$failed} CV(s) failed.";
         }
 
         return response()->json([
-            'success' => true,
-            'message' => 'Screening completed',
-            'job_id'  => $jobId,
+            'success'  => true,
+            'message'  => $message,
+            'job_id'   => $jobId,
+            'stats'    => [
+                'processed' => $processed,
+                'failed'    => $failed,
+                'total'     => $cvs->count(),
+            ],
         ]);
     }
 }

@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessCVJob;
+use App\Models\UploadJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\UploadJob;
+use Illuminate\Support\Facades\Log;
 
 class LandingPagePelamarController extends Controller
 {
     /**
-     * Tampilkan landing page pelamar (Upload CV + Riwayat CV)
-     * Bisa diakses tanpa login. Riwayat CV hanya terisi kalau sudah login.
+     * Tampilkan landing page pelamar
      */
     public function index()
     {
@@ -20,7 +21,7 @@ class LandingPagePelamarController extends Controller
 
         if (Auth::check()) {
             $riwayatCv = auth()->user()->cvs()
-                ->with('uploadJob')
+                ->with('uploadJob', 'matchingResult')
                 ->latest()
                 ->get();
         }
@@ -29,34 +30,60 @@ class LandingPagePelamarController extends Controller
     }
 
     /**
-     * Simpan CV yang diupload (wajib login, dijaga middleware auth di route)
+     * Upload CV dan dispatch AI processing ke queue
      */
     public function store(Request $request)
     {
         $request->validate([
             'upload_job_id' => 'required|exists:upload_jobs,id',
-            'cv_file'       => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB
+            'cv_file'       => 'required|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
-        $path = $request->file('cv_file')->store('cv_uploads', 'public');
+        try {
+            // Save the uploaded file
+            $path = $request->file('cv_file')->store('cv_uploads', 'public');
 
-        auth()->user()->cvs()->create([
-            'upload_job_id' => $request->upload_job_id,
-            'file_path'     => $path,
-            'file_name'     => $request->file('cv_file')->getClientOriginalName(),
-        ]);
+            // Create CV record
+            $cv = auth()->user()->cvs()->create([
+                'upload_job_id' => $request->upload_job_id,
+                'file_path'     => $path,
+                'file_name'     => $request->file('cv_file')->getClientOriginalName(),
+            ]);
 
-        return back()->with('success', 'Your CV has been uploaded successfully!');
+            // Dispatch async AI processing job
+            ProcessCVJob::dispatch($cv);
+
+            Log::info("CV #{$cv->id} uploaded and queued for AI processing", [
+                'job_id' => $request->upload_job_id,
+                'file'   => $cv->file_name,
+            ]);
+
+            return back()->with('success', 'CV uploaded successfully! AI analysis is in progress. Please check back later for results.');
+
+        } catch (\Throwable $e) {
+            Log::error('CV upload failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return back()->with('error', 'Failed to upload CV. Please try again.');
+        }
     }
 
     /**
-     * Hapus CV dari riwayat (wajib login, dijaga middleware auth di route)
+     * Hapus CV
      */
     public function destroy($id)
     {
         $cv = auth()->user()->cvs()->findOrFail($id);
 
+        // Hapus matching result jika ada
+        if ($cv->matchingResult) {
+            $cv->matchingResult->delete();
+        }
+
+        // Hapus file
         \Illuminate\Support\Facades\Storage::disk('public')->delete($cv->file_path);
+
         $cv->delete();
 
         return back()->with('success', 'CV deleted successfully.');

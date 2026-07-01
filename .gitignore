@@ -1,25 +1,79 @@
-*.log
-.DS_Store
-.env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.cursor/
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
-/node_modules
+# Laravel
+/vendor
 /public/build
 /public/hot
 /public/storage
 /storage/*.key
 /storage/pail
-/vendor
+/storage/framework/cache/*
+/storage/framework/views/*
+/storage/logs/*
+*.log
+.phpunit.result.cache
+.phpactor.json
 _ide_helper.php
-Homestead.json
-Homestead.yaml
+auth.json
+.env
+.env.backup
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+*.egg
+
+# IDE
+/.idea
+/.vscode
+/.nova
+/.zed
+/.cursor
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
 Thumbs.db
+desktop.ini
+
+# Node
+node_modules/
+package-lock.json
+
+# Composer
+composer.lock
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.nyc_output/
+coverage/
+
+# Database
+*.sqlite
+*.db
+
+# AI Engine
+python/__pycache__/
+python/.venv
+python/venv/
+python/*.pyc
+python/*.egg-info/
+
+# Test artifacts
+phpunit.xml
+tests/coverage/
+
+

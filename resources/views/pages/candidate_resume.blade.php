@@ -183,18 +183,50 @@ $candidate = $candidate ?? [
                 </span>
             </div>
 
-            {{-- Similarity Score --}}
+            {{-- TF-IDF Score --}}
+            <div class="py-3">
+                <div class="flex items-center gap-2 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span class="font-semibold text-gray-800 text-sm">TF-IDF Score</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="font-bold text-gray-800 text-sm">{{ number_format($candidate['tfidf_score'] ?? 0, 4) }}</span>
+                    <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-400 rounded-full" style="width: {{ ($candidate['tfidf_score'] ?? 0) * 100 }}%"></div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- SBERT Score --}}
+            <div class="py-3">
+                <div class="flex items-center gap-2 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    <span class="font-semibold text-gray-800 text-sm">SBERT Score</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="font-bold text-gray-800 text-sm">{{ number_format($candidate['sbert_score'] ?? 0, 4) }}</span>
+                    <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-purple-400 rounded-full" style="width: {{ ($candidate['sbert_score'] ?? 0) * 100 }}%"></div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Hybrid Score --}}
             <div class="py-3">
                 <div class="flex items-center gap-2 mb-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                     </svg>
-                    <span class="font-semibold text-gray-800 text-sm">Similarity Score</span>
+                    <span class="font-semibold text-gray-800 text-sm">Hybrid Score</span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="font-bold text-gray-800 text-sm">{{ $candidate['similarity'] }}</span>
+                    <span class="font-bold text-gray-800 text-sm">{{ number_format($candidate['hybrid_score'] ?? 0, 4) }}</span>
                     <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-[#4B52B0] rounded-full" style="width: {{ $candidate['similarity'] * 100 }}%"></div>
+                        <div class="h-full bg-yellow-400 rounded-full" style="width: {{ ($candidate['hybrid_score'] ?? 0) * 100 }}%"></div>
                     </div>
                 </div>
             </div>
@@ -259,7 +291,62 @@ $candidate = $candidate ?? [
     @endforeach
 </div>
 
-{{-- ===================== RECOMMENDATION ===================== --}}
+{{-- ===================== AI JOB RECOMMENDATIONS ===================== --}}
+@if(!empty($candidate['recommendations']))
+<div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+    <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 18h6m-5 3h4m-7-6a7 7 0 1110 0c-.866 1.155-1.5 2.292-1.5 3.5h-7c0-1.208-.634-2.345-1.5-3.5z"/>
+            </svg>
+        </div>
+        <h3 class="font-bold text-gray-900 text-lg">AI Job Recommendations</h3>
+    </div>
+
+    <div class="bg-[#F0F2FF] rounded-xl px-5 py-4 mb-4">
+        <p class="text-gray-700 text-sm leading-relaxed">
+            {{ $candidate['recommendation'] }}
+        </p>
+    </div>
+
+    {{-- Recommendations Table --}}
+    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div class="grid grid-cols-12 px-5 py-3 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+            <div class="col-span-1">#</div>
+            <div class="col-span-4">Recommended Position</div>
+            <div class="col-span-2 text-center">Confidence</div>
+            <div class="col-span-5">Supporting Skills</div>
+        </div>
+
+        @foreach($candidate['recommendations'] as $rec)
+        <div class="grid grid-cols-12 px-5 py-3 border-b border-gray-50 items-center hover:bg-gray-50 transition-colors">
+            <div class="col-span-1 text-sm font-bold text-gray-500">{{ $rec['rank'] ?? $loop->iteration }}</div>
+            <div class="col-span-4 text-sm font-semibold text-gray-800">{{ $rec['job_title'] }}</div>
+            <div class="col-span-2 text-center">
+                <span class="inline-flex items-center gap-1 text-xs font-bold
+                    {{ ($rec['confidence'] ?? 0) >= 80 ? 'text-green-600' : (($rec['confidence'] ?? 0) >= 50 ? 'text-yellow-500' : 'text-red-400') }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3l14 9-14 9V3z"/>
+                    </svg>
+                    {{ $rec['confidence'] ?? 0 }}%
+                </span>
+            </div>
+            <div class="col-span-5 flex flex-wrap gap-1">
+                @foreach(($rec['supporting_skills'] ?? []) as $skill)
+                    <span class="inline-block bg-[#E8EAFF] text-[#4B52B0] text-xs font-medium px-2 py-0.5 rounded-full">{{ $skill }}</span>
+                @endforeach
+            </div>
+        </div>
+        @if(!empty($rec['reasoning']))
+        <div class="px-5 pb-3 text-xs text-gray-500 italic pl-20">
+            {{ $rec['reasoning'] }}
+        </div>
+        @endif
+        @endforeach
+    </div>
+</div>
+@else
+{{-- ===================== FALLBACK RECOMMENDATION ===================== --}}
 <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
     <div class="flex items-center gap-3 mb-4">
         <div class="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center flex-shrink-0">
@@ -269,13 +356,13 @@ $candidate = $candidate ?? [
         </div>
         <h3 class="font-bold text-gray-900 text-lg">Recommendation</h3>
     </div>
-
     <div class="bg-[#F0F2FF] rounded-xl px-5 py-4">
         <p class="text-gray-700 text-sm leading-relaxed">
             {{ $candidate['recommendation'] }}
         </p>
     </div>
 </div>
+@endif
 
 {{-- ===================== ACTION BUTTONS ===================== --}}
 <div class="flex flex-col sm:flex-row items-center gap-3">
