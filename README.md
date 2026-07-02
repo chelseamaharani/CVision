@@ -191,7 +191,7 @@ echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env
 **Terminal 1 - FastAPI AI Engine:**
 ```bash
 cd python
-uvicorn main:app --reload --port 8000
+uvicorn main:app --reload --port 8080
 ```
 
 **Terminal 2 - Laravel Queue Worker:**
