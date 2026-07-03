@@ -23,7 +23,8 @@ from services.text_processor import (
 )
 from services.similarity import SimilarityService
 from services.gemini_client import GeminiClient
-from models.schemas import AnalyzeCVResponse, HealthResponse
+from services.resume_generator import ResumeGenerator
+from models.schemas import AnalyzeCVResponse, HealthResponse, ResumeResponse, ResumeDownloadResponse
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -42,6 +43,7 @@ if not GEMINI_API_KEY:
 
 similarity_service: SimilarityService | None = None
 gemini_client: GeminiClient | None = None
+resume_generator: ResumeGenerator | None = None
 
 logger = logging.getLogger("cvision.ai")
 
@@ -49,7 +51,7 @@ logger = logging.getLogger("cvision.ai")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""
-    global similarity_service, gemini_client
+    global similarity_service, gemini_client, resume_generator
 
     # Startup: load models
     logger.info("Loading SBERT model...")
@@ -59,6 +61,10 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing Gemini client...")
     gemini_client = GeminiClient(api_key=GEMINI_API_KEY)
     logger.info("Gemini client initialized.")
+
+    logger.info("Initializing Resume Generator...")
+    resume_generator = ResumeGenerator(gemini_client=gemini_client)
+    logger.info("Resume Generator initialized.")
 
     yield
 
@@ -186,6 +192,80 @@ async def analyze_cv(
         experience_years=experience_years,
         education_level=education_level,
     )
+
+
+@app.post("/api/cv/generate-resume", response_model=ResumeResponse)
+async def generate_resume(
+    cv_text: str = Form(...),
+):
+    """
+    Generate a structured resume from raw CV text.
+    Uses Gemini AI to extract and organize information.
+    Falls back to rule-based extraction if Gemini is unavailable.
+    """
+    if not cv_text.strip():
+        raise HTTPException(status_code=400, detail="CV text is required")
+
+    try:
+        # Clean UTF-8
+        cv_text = cv_text.encode('utf-8', 'replace').decode('utf-8')
+        
+        # Generate structured resume
+        structured_resume = resume_generator.generate_structured_resume(cv_text)
+        
+        return ResumeResponse(
+            success=True,
+            data=_clean_utf8(structured_resume),
+            error=None,
+        )
+    except Exception as e:
+        logger.error(f"Resume generation failed: {e}")
+        return ResumeResponse(
+            success=False,
+            data=None,
+            error=str(e),
+        )
+
+
+@app.post("/api/cv/generate-resume-text", response_model=ResumeDownloadResponse)
+async def generate_resume_text(
+    cv_text: str = Form(...),
+):
+    """
+    Generate a formatted resume text for download.
+    Suitable for displaying in the browser or downloading as .txt file.
+    """
+    if not cv_text.strip():
+        raise HTTPException(status_code=400, detail="CV text is required")
+
+    try:
+        # Clean UTF-8
+        cv_text = cv_text.encode('utf-8', 'replace').decode('utf-8')
+        
+        # Generate structured resume
+        structured_resume = resume_generator.generate_structured_resume(cv_text)
+        
+        # Generate formatted text version
+        resume_text = resume_generator.generate_resume_text(structured_resume)
+        
+        # Get filename
+        name = structured_resume.get('name', 'Resume').replace(' ', '_')
+        filename = f"{name}_Resume.txt"
+        
+        return ResumeDownloadResponse(
+            success=True,
+            filename=filename,
+            content=resume_text,
+            error=None,
+        )
+    except Exception as e:
+        logger.error(f"Resume text generation failed: {e}")
+        return ResumeDownloadResponse(
+            success=False,
+            filename=None,
+            content=None,
+            error=str(e),
+        )
 
 
 def _clean_utf8(data):

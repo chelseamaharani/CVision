@@ -157,138 +157,203 @@ $candidate = $candidate ?? [
 
             {{-- Experience Fit --}}
             <div class="py-3">
-                <div class="flex items-center gap-2 mb-1">
+                <div class="flex items-center gap-2 mb-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#4B52B0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
-                    <span class="font-semibold text-gray-800 text-sm">Experience Fit</span>
+                    <span class="font-semibold text-gray-800 text-sm">Experience</span>
                 </div>
-                <p class="text-gray-500 text-xs mb-2">Meets minimum requirement</p>
-                <span class="bg-green-100 text-green-600 text-xs font-semibold px-2.5 py-1 rounded-full">
-                    {{ $candidate['experience_years'] }}
-                </span>
+                <p class="text-gray-700 text-sm font-medium mb-1">
+                    {{ $candidate['experience_years'] }} years of experience
+                </p>
+                <p class="text-gray-400 text-xs">Extracted from CV</p>
             </div>
 
             {{-- Education Fit --}}
             <div class="py-3">
-                <div class="flex items-center gap-2 mb-1">
+                <div class="flex items-center gap-2 mb-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#4B52B0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0112 20.055a12.083 12.083 0 01-6.16-9.477L12 14z"/>
                     </svg>
-                    <span class="font-semibold text-gray-800 text-sm">Education Fit</span>
+                    <span class="font-semibold text-gray-800 text-sm">Education</span>
                 </div>
-                <p class="text-gray-500 text-xs mb-2">Matches requirement</p>
-                <span class="bg-[#DDE0F5] text-[#4B52B0] text-xs font-semibold px-2.5 py-1 rounded-full">
+                <p class="text-gray-700 text-sm font-medium mb-1">
                     {{ $candidate['education'] }}
-                </span>
+                </p>
+                <p class="text-gray-400 text-xs">Extracted from CV</p>
             </div>
 
-            {{-- TF-IDF Score --}}
-            <div class="py-3">
-                <div class="flex items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
-                    <span class="font-semibold text-gray-800 text-sm">TF-IDF Score</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="font-bold text-gray-800 text-sm">{{ number_format($candidate['tfidf_score'] ?? 0, 4) }}</span>
-                    <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-blue-400 rounded-full" style="width: {{ ($candidate['tfidf_score'] ?? 0) * 100 }}%"></div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- SBERT Score --}}
-            <div class="py-3">
-                <div class="flex items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
-                    <span class="font-semibold text-gray-800 text-sm">SBERT Score</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="font-bold text-gray-800 text-sm">{{ number_format($candidate['sbert_score'] ?? 0, 4) }}</span>
-                    <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-purple-400 rounded-full" style="width: {{ ($candidate['sbert_score'] ?? 0) * 100 }}%"></div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Hybrid Score --}}
-            <div class="py-3">
-                <div class="flex items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                    </svg>
-                    <span class="font-semibold text-gray-800 text-sm">Hybrid Score</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="font-bold text-gray-800 text-sm">{{ number_format($candidate['hybrid_score'] ?? 0, 4) }}</span>
-                    <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-yellow-400 rounded-full" style="width: {{ ($candidate['hybrid_score'] ?? 0) * 100 }}%"></div>
-                    </div>
-                </div>
-            </div>
 
         </div>
     </div>
 
 </div>
 
-{{-- ===================== EXPERIENCE ===================== --}}
+{{-- ===================== RESUME ===================== --}}
 <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
     <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-gray-900 text-lg">Experience</h3>
-        @if(!empty($candidate['experience']))
-        <a href="#" class="text-[#4B52B0] text-sm font-semibold hover:underline flex items-center gap-1">
-            View Full Story
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-        </a>
-        @endif
-    </div>
-
-    @if(empty($candidate['experience']))
-        <div class="text-center py-8">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-            <p class="text-gray-400 text-sm">Work experience details have not been extracted from this CV yet.</p>
-        </div>
-    @endif
-
-    @foreach($candidate['experience'] as $exp)
-    <div class="flex gap-4 {{ !$loop->last ? 'mb-6' : '' }}">
-        <div class="flex flex-col items-center flex-shrink-0">
-            <div class="w-10 h-10 rounded-lg bg-[#E8EAFF] flex items-center justify-center">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[#E8EAFF] flex items-center justify-center flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#4B52B0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
             </div>
-            @if(!$loop->last)
-                <div class="w-px flex-1 bg-gray-200 mt-2"></div>
+            <h3 class="font-bold text-gray-900 text-lg">Resume</h3>
+            <span class="text-gray-400 text-xs">Generated by AI</span>
+        </div>
+    </div>
+
+    @if(!empty($candidate['structured_resume']))
+        @php $resume = $candidate['structured_resume']; @endphp
+        
+        {{-- Name & Contact --}}
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-1">{{ $resume['name'] ?? $candidate['name'] }}</h2>
+            @if(!empty($resume['email']) || !empty($resume['phone']))
+            <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+                @if(!empty($resume['email']))
+                <span class="flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    {{ $resume['email'] }}
+                </span>
+                @endif
+                @if(!empty($resume['phone']))
+                <span class="flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                    </svg>
+                    {{ $resume['phone'] }}
+                </span>
+                @endif
+                @if(!empty($resume['address']))
+                <span class="flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    {{ $resume['address'] }}
+                </span>
+                @endif
+            </div>
             @endif
         </div>
 
-        <div class="flex-1 pb-2">
-            <div class="flex items-center justify-between flex-wrap gap-2 mb-1">
-                <h4 class="font-semibold text-gray-800 text-base">{{ $exp['title'] }}</h4>
-                <div class="flex items-center gap-2">
-                    <span class="text-gray-400 text-sm">{{ $exp['period'] }}</span>
-                    <span class="bg-green-100 text-green-600 text-xs font-semibold px-2.5 py-1 rounded-full">{{ $exp['duration'] }}</span>
+        {{-- Professional Summary --}}
+        @if(!empty($resume['summary']))
+        <div class="mb-5">
+            <h4 class="font-semibold text-gray-800 text-sm uppercase tracking-wide mb-2">Professional Summary</h4>
+            <p class="text-gray-600 text-sm leading-relaxed">{{ $resume['summary'] }}</p>
+        </div>
+        @endif
+
+        {{-- Experience --}}
+        @if(!empty($resume['experience']))
+        <div class="mb-5">
+            <h4 class="font-semibold text-gray-800 text-sm uppercase tracking-wide mb-3">Work Experience</h4>
+            <div class="space-y-4">
+                @foreach($resume['experience'] as $exp)
+                <div class="border-l-2 border-[#4B52B0] pl-4">
+                    <div class="flex items-start justify-between flex-wrap gap-1">
+                        <h5 class="font-semibold text-gray-800 text-sm">{{ $exp['title'] ?? '' }}</h5>
+                        @if(!empty($exp['period']))
+                        <span class="text-gray-400 text-xs">{{ $exp['period'] }}</span>
+                        @endif
+                    </div>
+                    @if(!empty($exp['company']))
+                    <p class="text-gray-500 text-xs mb-1">{{ $exp['company'] }}</p>
+                    @endif
+                    @if(!empty($exp['description']))
+                    <ul class="list-disc list-inside text-gray-600 text-xs space-y-1 mt-1">
+                        @foreach((array)$exp['description'] as $desc)
+                        <li>{{ $desc }}</li>
+                        @endforeach
+                    </ul>
+                    @endif
                 </div>
+                @endforeach
             </div>
-            <p class="text-gray-400 text-sm mb-3">{{ $exp['company'] }}</p>
-            <ul class="list-disc list-inside text-gray-600 text-sm space-y-1.5">
-                @foreach($exp['points'] as $point)
-                    <li>{{ $point }}</li>
+        </div>
+        @endif
+
+        {{-- Education --}}
+        @if(!empty($resume['education']))
+        <div class="mb-5">
+            <h4 class="font-semibold text-gray-800 text-sm uppercase tracking-wide mb-3">Education</h4>
+            <div class="space-y-3">
+                @foreach($resume['education'] as $edu)
+                <div class="flex items-start justify-between flex-wrap gap-1">
+                    <div>
+                        @if(!empty($edu['degree']))
+                        <p class="font-semibold text-gray-800 text-sm">{{ $edu['degree'] }}</p>
+                        @endif
+                        @if(!empty($edu['institution']))
+                        <p class="text-gray-500 text-xs">{{ $edu['institution'] }}</p>
+                        @endif
+                    </div>
+                    <div class="text-right">
+                        @if(!empty($edu['year']))
+                        <span class="text-gray-400 text-xs">{{ $edu['year'] }}</span>
+                        @endif
+                        @if(!empty($edu['gpa']))
+                        <br><span class="text-gray-400 text-xs">GPA: {{ $edu['gpa'] }}</span>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- Skills --}}
+        @if(!empty($resume['skills']))
+        <div class="mb-5">
+            <h4 class="font-semibold text-gray-800 text-sm uppercase tracking-wide mb-3">Skills</h4>
+            <div class="flex flex-wrap gap-2">
+                @foreach($resume['skills'] as $skill)
+                <span class="inline-block bg-[#E8EAFF] text-[#4B52B0] text-xs font-medium px-3 py-1 rounded-full">{{ $skill }}</span>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- Certifications --}}
+        @if(!empty($resume['certifications']))
+        <div class="mb-5">
+            <h4 class="font-semibold text-gray-800 text-sm uppercase tracking-wide mb-3">Certifications</h4>
+            <ul class="list-disc list-inside text-gray-600 text-sm space-y-1">
+                @foreach($resume['certifications'] as $cert)
+                <li>{{ $cert }}</li>
                 @endforeach
             </ul>
         </div>
-    </div>
-    @endforeach
+        @endif
+
+        {{-- Languages --}}
+        @if(!empty($resume['languages']))
+        <div>
+            <h4 class="font-semibold text-gray-800 text-sm uppercase tracking-wide mb-3">Languages</h4>
+            <div class="flex flex-wrap gap-2">
+                @foreach($resume['languages'] as $lang)
+                <span class="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1 rounded-full">{{ $lang }}</span>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    @elseif(!empty($candidate['cv_text']))
+        {{-- Fallback: Show raw CV text if structured resume not available --}}
+        <div class="bg-gray-50 rounded-xl p-5 max-h-96 overflow-y-auto">
+            <pre class="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">{{ $candidate['cv_text'] }}</pre>
+        </div>
+    @else
+        <div class="text-center py-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <p class="text-gray-400 text-sm">CV text has not been extracted yet.</p>
+        </div>
+    @endif
 </div>
 
 {{-- ===================== AI JOB RECOMMENDATIONS ===================== --}}
@@ -375,16 +440,58 @@ $candidate = $candidate ?? [
         Back to Candidates
     </a>
 
-    <a href="mailto:{{ $candidate['email'] }}"
-       class="flex-1 w-full sm:w-auto flex items-center justify-center gap-2 bg-[#F0F2FF] hover:bg-[#E0E3FA] text-gray-700 font-semibold text-sm px-6 py-3 rounded-xl transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-        </svg>
-        Contact via Email
-    </a>
+    @php
+        // Pastikan email valid untuk mailto
+        $emailTo = $candidate['email'] && $candidate['email'] !== '-' ? $candidate['email'] : '';
+        
+        // Dapatkan path file CV yang benar
+        $cvDownloadPath = null;
+        if ($candidate['cv_path']) {
+            $fullPath = storage_path('app/' . $candidate['cv_path']);
+            if (file_exists($fullPath)) {
+                $cvDownloadPath = asset('storage/' . $candidate['cv_path']);
+            } elseif (file_exists($candidate['cv_path'])) {
+                $cvDownloadPath = asset('storage/' . basename($candidate['cv_path']));
+            }
+        }
+        
+        // Nama file untuk resume download
+        $resumeFileName = str_replace(' ', '_', ($candidate['name'] ?? 'Resume')) . '_CVision_Resume.txt';
+    @endphp
 
-    @if($candidate['cv_path'])
-        <a href="{{ asset('storage/' . $candidate['cv_path']) }}" target="_blank" download
+    @if($emailTo)
+        <a href="mailto:{{ $emailTo }}?subject=Re: {{ urlencode($candidate['position'] ?? 'Job Application') }}"
+           target="_blank"
+           class="flex-1 w-full sm:w-auto flex items-center justify-center gap-2 bg-[#F0F2FF] hover:bg-[#E0E3FA] text-gray-700 font-semibold text-sm px-6 py-3 rounded-xl transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            Contact via Email
+        </a>
+    @else
+        <span class="flex-1 w-full sm:w-auto flex items-center justify-center gap-2 bg-gray-200 text-gray-400 font-semibold text-sm px-6 py-3 rounded-xl cursor-not-allowed">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            No Email Available
+        </span>
+    @endif
+
+    @if(!empty($candidate['resume_text']))
+        {{-- Download AI-generated resume as .txt file --}}
+        <a href="data:text/plain;charset=utf-8,{{ urlencode($candidate['resume_text']) }}"
+           download="{{ $resumeFileName }}"
+           class="flex-1 w-full sm:w-auto flex items-center justify-center gap-2 bg-[#2D3799] hover:bg-[#232d85] text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Download Resume
+        </a>
+    @elseif($cvDownloadPath)
+        {{-- Fallback: download original PDF --}}
+        <a href="{{ $cvDownloadPath }}" 
+           download="{{ $candidate['name'] ?? 'Resume' }}_CV.pdf"
+           target="_blank"
            class="flex-1 w-full sm:w-auto flex items-center justify-center gap-2 bg-[#2D3799] hover:bg-[#232d85] text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors shadow-md">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>

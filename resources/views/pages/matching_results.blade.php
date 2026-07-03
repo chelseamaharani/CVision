@@ -172,22 +172,24 @@
             </div>
 
             {{-- Matching Score --}}
-            <div class="col-span-3 flex items-center justify-center gap-3">
-                {{-- Circle progress --}}
-                <div class="relative w-12 h-12 flex-shrink-0">
-                    <svg class="w-12 h-12 -rotate-90" viewBox="0 0 36 36">
-                        <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E8EAFF" stroke-width="3"/>
-                        <circle cx="18" cy="18" r="15.9" fill="none" stroke="#38BDF8" stroke-width="3"
-                            stroke-dasharray="{{ $c['score'] }}, 100"
-                            stroke-linecap="round"/>
-                    </svg>
-                    <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-700">{{ $c['score'] }}%</span>
+            <div class="col-span-3 flex flex-col items-center justify-center gap-1">
+                <div class="flex items-center gap-2">
+                    {{-- Circle progress --}}
+                    <div class="relative w-12 h-12 flex-shrink-0">
+                        <svg class="w-12 h-12 -rotate-90" viewBox="0 0 36 36">
+                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E8EAFF" stroke-width="3"/>
+                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#38BDF8" stroke-width="3"
+                                stroke-dasharray="{{ $c['score'] }}, 100"
+                                stroke-linecap="round"/>
+                        </svg>
+                        <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-700">{{ $c['score'] }}%</span>
+                    </div>
                 </div>
 
-                {{-- Top Match badge --}}
+                {{-- Top Match badge below score --}}
                 @if($c['top'])
-                <span class="inline-flex items-center gap-1 bg-green-100 text-green-600 text-xs font-semibold px-2.5 py-1 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <span class="inline-flex items-center gap-1 bg-green-100 text-green-600 text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/>
                     </svg>
                     Top Match

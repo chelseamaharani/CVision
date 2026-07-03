@@ -55,6 +55,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // Candidates
     Route::get('/candidates', [CandidatesController::class, 'index'])->name('candidates.index');
+    Route::delete('/candidates/{id}', [CandidatesController::class, 'destroy'])->name('candidates.destroy');
 
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');

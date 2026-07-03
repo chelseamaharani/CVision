@@ -24,6 +24,21 @@ class HealthResponse(BaseModel):
     model_loaded: bool = Field(..., description="Whether SBERT model is loaded")
 
 
+class ResumeResponse(BaseModel):
+    """Response schema for resume generation endpoint."""
+    success: bool = Field(..., description="Whether resume generation was successful")
+    data: dict[str, Any] | None = Field(default=None, description="Structured resume data")
+    error: str | None = Field(default=None, description="Error message if failed")
+
+
+class ResumeDownloadResponse(BaseModel):
+    """Response schema for resume download endpoint."""
+    success: bool = Field(..., description="Whether PDF generation was successful")
+    filename: str | None = Field(default=None, description="Generated PDF filename")
+    content: str | None = Field(default=None, description="Text content for the resume")
+    error: str | None = Field(default=None, description="Error message if failed")
+
+
 class ErrorResponse(BaseModel):
     """Response schema for error cases."""
     detail: str = Field(..., description="Error description")

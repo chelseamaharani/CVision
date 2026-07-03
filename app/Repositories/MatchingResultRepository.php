@@ -34,16 +34,27 @@ class MatchingResultRepository
             $query->where('status', $filters['status']);
         }
 
-        // Sorting
-        $sortBy = $filters['sort_by'] ?? 'score';
-        $sortDir = $filters['sort_dir'] ?? 'desc';
-        $allowedSorts = ['score', 'rank', 'experience_years', 'created_at'];
+        // Always sort by score descending for proper ranking
+        $query->orderBy('score', 'desc');
 
-        if (in_array($sortBy, $allowedSorts)) {
-            $query->orderBy($sortBy, $sortDir === 'asc' ? 'asc' : 'desc');
+        // Paginate first (this returns LengthAwarePaginator)
+        $paginatedResults = $query->paginate($perPage);
+
+        // Reassign sequential ranks (1, 2, 3, 4...) without duplicates
+        $rank = 1;
+        $previousScore = null;
+        
+        foreach ($paginatedResults as $result) {
+            // Only update rank if score is different from previous
+            if ($result->score !== $previousScore) {
+                $result->rank = $rank;
+                $result->save();
+            }
+            $previousScore = $result->score;
+            $rank++;
         }
 
-        return $query->paginate($perPage);
+        return $paginatedResults;
     }
 
     /**

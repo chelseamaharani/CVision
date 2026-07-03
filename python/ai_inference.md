@@ -25,7 +25,7 @@ self.sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 ### 3. Gemini — Cloud API (Zero-Shot)
 ```python
-response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+response = client.models.generate_content(model="gemini-2.5-flash-lite", contents=prompt)
 ```
 - Google's already-trained model running in the cloud
 - Works on any CV text without seeing your specific data

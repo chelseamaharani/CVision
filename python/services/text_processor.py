@@ -73,22 +73,42 @@ def extract_years_of_experience(text: str) -> float:
 def extract_education_level(text: str) -> str:
     """
     Extract highest education level from text.
+    Supports both Indonesian and English education terms.
 
     Args:
         text: CV text to analyze
 
     Returns:
-        Highest education level found (e.g., 'PhD', 'Master', 'Bachelor', 'Diploma', 'High School')
+        Highest education level found (e.g., 'S1', 'D3', 'SMA', 'SMP')
     """
     text_lower = text.lower()
-    if any(term in text_lower for term in ['phd', 'doctorate', 'doctoral', 'ph.d']):
-        return 'PhD'
-    if any(term in text_lower for term in ['master', "master's", 'masters', 'm.sc', 'm.a', 'msc', 'ma']):
-        return 'Master'
-    if any(term in text_lower for term in ['bachelor', "bachelor's", 'bachelors', 'b.sc', 'b.a', 'bsc', 'ba', 's1', 'undergraduate']):
-        return 'Bachelor'
-    if any(term in text_lower for term in ['diploma', 'd3', 'd4', 'associate']):
-        return 'Diploma'
-    if any(term in text_lower for term in ['high school', 'sma', 'smk', 'smp']):
-        return 'High School'
+    
+    # PhD / S3
+    if any(term in text_lower for term in ['phd', 'doctorate', 'doctoral', 'ph.d', 's3']):
+        return 'S3'
+    
+    # Master / S2
+    if any(term in text_lower for term in ['master', "master's", 'masters', 'm.sc', 'm.a', 'msc', 'ma', 's2']):
+        return 'S2'
+    
+    # Bachelor / S1
+    if any(term in text_lower for term in ['bachelor', "bachelor's", 'bachelors', 'b.sc', 'b.a', 'bsc', 'ba', 's1', 'undergraduate', 'sarjana']):
+        return 'S1'
+    
+    # D4
+    if any(term in text_lower for term in ['d4', 'diploma 4', 'diploma iv']):
+        return 'D4'
+    
+    # D3
+    if any(term in text_lower for term in ['d3', 'diploma 3', 'diploma iii', 'associate degree']):
+        return 'D3'
+    
+    # SMA/SMK (High School)
+    if any(term in text_lower for term in ['sma', 'smk', 'high school', 'secondary school', 'senior high']):
+        return 'SMA/SMK'
+    
+    # SMP (Junior High School)
+    if any(term in text_lower for term in ['smp', 'junior high', 'middle school']):
+        return 'SMP'
+    
     return 'Unknown'

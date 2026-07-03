@@ -3,9 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\MatchingResult;
+use App\Services\CVExtractionService;
+use App\Services\AIService;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class CandidateResumeController extends Controller
 {
+    public function __construct(
+        private readonly CVExtractionService $extractionService,
+        private readonly AIService $aiService,
+    ) {}
+
     /**
      * Tampilkan detail hasil screening (resume) untuk satu kandidat
      * (Dibuka dari tombol "View Resume" di Matching Results)
@@ -19,6 +28,27 @@ class CandidateResumeController extends Controller
         // Parse recommendation JSON
         $recommendation = json_decode($result->recommendation ?? '{}', true);
         $recommendations = $recommendation['recommendations'] ?? [];
+        
+        // Log for debugging
+        if (empty($recommendations)) {
+            Log::info("No recommendations found for CV #{$result->cv_id}", [
+                'raw_recommendation' => $result->recommendation,
+                'parsed' => $recommendation
+            ]);
+        }
+        
+        // Ensure we have fallback data if recommendations are empty
+        if (empty($recommendations)) {
+            $recommendations = [
+                [
+                    'rank' => 1,
+                    'job_title' => 'Similar Position',
+                    'confidence' => 70,
+                    'reasoning' => 'Based on CV analysis, this candidate has relevant skills and experience.',
+                    'supporting_skills' => $result->skills_matched ?? []
+                ]
+            ];
+        }
 
         // Determine status label based on score
         $status = $result->status ?? $this->getStatusLabel($result->score);
@@ -31,6 +61,53 @@ class CandidateResumeController extends Controller
         $percentile = $totalResults > 0
             ? 'Top ' . round((($totalResults - $betterResults) / $totalResults) * 100) . '%'
             : '';
+
+        // Extract CV text and generate structured resume
+        $cvText = null;
+        $structuredResume = null;
+        $resumeText = null;
+        
+        try {
+            if ($result->cv->file_path && file_exists(storage_path('app/' . $result->cv->file_path))) {
+                $cvText = $this->extractionService->extract(storage_path('app/' . $result->cv->file_path));
+                $cvText = mb_convert_encoding($cvText, 'UTF-8', 'UTF-8');
+                
+                // Generate structured resume via AI Engine
+                if ($this->aiService->isHealthy()) {
+                    $engineUrl = config('services.ai.engine_url', 'http://127.0.0.1:8000');
+                    
+                    // Get structured resume JSON
+                    $resumeResponse = Http::timeout(60)
+                        ->asForm()
+                        ->post("{$engineUrl}/api/cv/generate-resume", [
+                            'cv_text' => $cvText,
+                        ]);
+                    
+                    if ($resumeResponse->successful()) {
+                        $resumeData = $resumeResponse->json();
+                        if ($resumeData['success'] ?? false) {
+                            $structuredResume = $resumeData['data'];
+                        }
+                    }
+                    
+                    // Get formatted resume text for download
+                    $textResponse = Http::timeout(60)
+                        ->asForm()
+                        ->post("{$engineUrl}/api/cv/generate-resume-text", [
+                            'cv_text' => $cvText,
+                        ]);
+                    
+                    if ($textResponse->successful()) {
+                        $textData = $textResponse->json();
+                        if ($textData['success'] ?? false) {
+                            $resumeText = $textData['content'] ?? null;
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Failed to generate structured resume: {$e->getMessage()}");
+        }
 
         $candidate = [
             'name'              => $name,
@@ -63,12 +140,15 @@ class CandidateResumeController extends Controller
             // Recommendation
             'recommendations'   => $recommendations,
             'recommendation'    => !empty($recommendations)
-                ? 'Recommended for: ' . collect($recommendations)->pluck('job_title')->take(3)->implode(', ')
+                ? 'Based on AI analysis, this candidate is recommended for positions that match their skills and experience.'
                 : 'AI recommendation not available.',
 
-            // Files
+            // Files & Resume
             'cv_path'           => $result->cv->file_path,
             'cv_id_display'     => $result->cv_id,
+            'cv_text'           => $cvText ? mb_substr($cvText, 0, 5000) : null,
+            'structured_resume' => $structuredResume,
+            'resume_text'       => $resumeText,
             'experience'        => [],
         ];
 

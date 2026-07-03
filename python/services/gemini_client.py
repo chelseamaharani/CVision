@@ -20,7 +20,7 @@ class GeminiClient:
     Includes retry logic with exponential backoff for rate limiting.
     """
 
-    def __init__(self, api_key: str, model: str = "gemini-2.5-flash"):
+    def __init__(self, api_key: str, model: str = "gemini-2.5-flash-lite"):
         """
         Initialize the Gemini client.
 
@@ -195,6 +195,85 @@ CV:
                 "recommendation": "ERROR",
                 "reasoning": f"Analysis failed: {str(e)}"
             }
+
+    def generate_resume_json(self, cv_text: str) -> dict[str, Any]:
+        """
+        Generate a structured resume JSON from raw CV text using Gemini.
+
+        Args:
+            cv_text: Raw text extracted from CV PDF
+
+        Returns:
+            Dict with 'success' and 'data' keys containing structured resume
+        """
+        prompt = self._build_resume_prompt(cv_text)
+        
+        try:
+            result = self._call_with_retry(prompt)
+            return {
+                "success": True,
+                "data": result
+            }
+        except Exception as e:
+            logger.error(f"Gemini resume generation failed: {e}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+    def _build_resume_prompt(self, cv_text: str) -> str:
+        """
+        Build the prompt for resume structure generation.
+
+        Args:
+            cv_text: CV text to analyze
+
+        Returns:
+            Formatted prompt string
+        """
+        return f"""
+You are an experienced HR Recruitment Specialist and Resume Writer.
+
+Analyze the following CV text and extract structured information into a clean, professional resume format.
+
+Return ONLY valid JSON with this exact structure:
+{{
+    "name": "Full Name",
+    "email": "email@example.com",
+    "phone": "+62 812 3456 7890",
+    "address": "City, Country",
+    "summary": "Professional summary paragraph (2-3 sentences)",
+    "experience": [
+        {{
+            "title": "Job Title",
+            "company": "Company Name",
+            "period": "Jan 2020 - Present",
+            "description": ["achievement 1", "achievement 2"]
+        }}
+    ],
+    "education": [
+        {{
+            "degree": "S1 Informatika",
+            "institution": "University Name",
+            "year": "2018-2022",
+            "gpa": "3.50"
+        }}
+    ],
+    "skills": ["Skill 1", "Skill 2", "Skill 3"],
+    "certifications": ["Cert 1", "Cert 2"],
+    "languages": ["Indonesian (Native)", "English (Professional)"]
+}}
+
+Rules:
+1. Extract ALL information from the CV text
+2. If information is not available, use empty string or empty list
+3. Keep experience descriptions concise but informative
+4. Skills should be a flat list of unique skills
+5. Return ONLY valid JSON, no other text
+
+CV:
+{cv_text}
+"""
 
     def _build_recommendation_prompt(self, cv_text: str) -> str:
         """

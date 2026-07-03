@@ -41,9 +41,9 @@
     {{-- Table Header --}}
     <div class="grid grid-cols-12 px-6 py-3 bg-[#9AA0D8] text-sm font-semibold text-gray-800">
         <div class="col-span-1">No</div>
-        <div class="col-span-4">Name Candidate</div>
-        <div class="col-span-4">Position</div>
-        <div class="col-span-3">Action</div>
+        <div class="col-span-3">Name Candidate</div>
+        <div class="col-span-3">Position</div>
+        <div class="col-span-5">Action</div>
     </div>
 
     {{-- Table Rows --}}
@@ -66,32 +66,41 @@
                 <span class="text-lg font-bold text-gray-800">{{ $index + 1 }}.</span>
             </div>
 
-            <div class="col-span-4">
+            <div class="col-span-3">
                 <span class="font-semibold text-gray-800 text-sm">{{ $candidate['name'] }}</span>
             </div>
 
-            <div class="col-span-4">
+            <div class="col-span-3">
                 <span class="text-gray-700 text-sm">{{ $candidate['position'] }}</span>
             </div>
 
-            <div class="col-span-3">
+            <div class="col-span-5 flex items-center gap-2">
                 @if($candidate['cv_path'])
-                    {{-- Buka file CV asli yang diupload pelamar, di tab baru --}}
                     <a href="{{ asset('storage/' . $candidate['cv_path']) }}" target="_blank"
-                       class="inline-flex items-center gap-2 border-2 border-[#2D3799] text-[#2D3799] font-semibold text-sm px-4 py-2 rounded-lg hover:bg-[#2D3799] hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z"/>
+                       class="inline-flex items-center gap-1.5 border-2 border-[#2D3799] text-[#2D3799] font-semibold text-xs px-3 py-2 rounded-lg hover:bg-[#2D3799] hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                         </svg>
                         View CV
                     </a>
                 @else
-                    <span class="inline-flex items-center gap-2 border-2 border-gray-200 text-gray-400 font-semibold text-sm px-4 py-2 rounded-lg cursor-not-allowed">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z"/>
+                    <span class="inline-flex items-center gap-1.5 border-2 border-gray-200 text-gray-400 font-semibold text-xs px-3 py-2 rounded-lg cursor-not-allowed">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                         </svg>
                         View CV
                     </span>
                 @endif
+
+                <button onclick="deleteCandidate({{ $candidate['id'] }}, this)"
+                        class="inline-flex items-center gap-1.5 border-2 border-red-200 text-red-500 font-semibold text-xs px-3 py-2 rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Hapus
+                </button>
             </div>
 
         </div>
@@ -113,6 +122,9 @@
 
 @push('scripts')
 <script>
+    const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+
+    // Search filter
     document.getElementById('searchCandidateInput').addEventListener('input', function() {
         const keyword = this.value.toLowerCase().trim();
         const rows = document.querySelectorAll('.candidate-row');
@@ -130,5 +142,52 @@
 
         document.getElementById('emptyCandidateState').classList.toggle('hidden', found > 0);
     });
+
+    // Delete candidate
+    async function deleteCandidate(candidateId, button) {
+        if (!confirm('Yakin ingin menghapus kandidat ini? Semua data terkait (CV, hasil screening) akan dihapus permanen.')) {
+            return;
+        }
+
+        const originalHTML = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = `<span class="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin inline-block"></span>`;
+
+        try {
+            const response = await fetch(`/candidates/${candidateId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Hapus row dari tabel dengan animasi fade
+                const row = button.closest('.candidate-row');
+                row.style.transition = 'all 0.3s ease';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(20px)';
+                
+                setTimeout(() => {
+                    row.remove();
+                }, 300);
+
+                alert('✅ ' + data.message);
+            } else {
+                alert('❌ ' + data.message);
+                button.disabled = false;
+                button.innerHTML = originalHTML;
+            }
+
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('❌ Terjadi kesalahan. Silakan coba lagi.');
+            button.disabled = false;
+            button.innerHTML = originalHTML;
+        }
+    }
 </script>
 @endpush
