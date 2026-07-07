@@ -30,6 +30,9 @@
     </div>
 </div>
 
+{{-- Footer --}}
+@include('components.footer_dashboard')
+
 @stack('scripts')
 </body>
 </html>

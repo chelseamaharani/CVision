@@ -8,14 +8,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>* { font-family: 'Poppins', sans-serif; }</style>
 </head>
-<body class="bg-white antialiased">
+<body class="bg-white antialiased flex flex-col min-h-screen">
 
     {{-- Navbar khusus pelamar (bukan navbar admin) --}}
     @include('components.navbar_pelamar')
 
-    <main>
+    <main class="flex-1">
         @yield('content')
     </main>
+
+    @include('components.footer_pelamar')
 
     @stack('scripts')
 </body>

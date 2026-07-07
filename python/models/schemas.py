@@ -20,6 +20,8 @@ class AnalyzeCVResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     """Response schema for health check endpoint."""
+    model_config = {"protected_namespaces": ()}
+    
     status: str = Field(..., description="Service status")
     model_loaded: bool = Field(..., description="Whether SBERT model is loaded")
 

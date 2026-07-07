@@ -3,12 +3,15 @@ Similarity Calculation Service
 Provides TF-IDF, SBERT, and hybrid scoring for CV-job matching.
 """
 
+import logging
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 
 from .text_processor import preprocess_text
+
+logger = logging.getLogger(__name__)
 
 
 class SimilarityService:
@@ -24,8 +27,15 @@ class SimilarityService:
         Args:
             sbert_model_name: Name of the SentenceTransformer model to use
         """
-        self.sbert_model = SentenceTransformer(sbert_model_name)
-        self._model_loaded = True
+        try:
+            logger.info(f"Loading SBERT model: {sbert_model_name}")
+            self.sbert_model = SentenceTransformer(sbert_model_name)
+            self._model_loaded = True
+            logger.info(f"SBERT model loaded successfully")
+        except Exception as e:
+            logger.error(f"Failed to load SBERT model: {e}")
+            self._model_loaded = False
+            self.sbert_model = None
 
     @property
     def is_loaded(self) -> bool:
@@ -46,10 +56,28 @@ class SimilarityService:
         clean_cv = preprocess_text(cv_text)
         clean_job = preprocess_text(job_text)
 
-        vectorizer = TfidfVectorizer()
+        # Use word n-grams (1-2) to capture phrases and individual terms
+        # Don't remove stop words - they provide context and improve matching
+        # Use sublinear_tf to reduce impact of very frequent terms
+        vectorizer = TfidfVectorizer(
+            ngram_range=(1, 2),  # Use unigrams and bigrams
+            min_df=1,
+            max_df=0.95,
+            stop_words=None,  # Don't remove stop words - they provide context
+            max_features=30000,  # Increase features to capture more terms
+            sublinear_tf=True,  # Use log scaling (1 + log(tf)) instead of raw tf
+            norm='l2',  # L2 normalization
+        )
         documents = [clean_job, clean_cv]
         matrix = vectorizer.fit_transform(documents)
+        
+        # Check if matrix has any non-zero values
+        if matrix.nnz == 0:
+            logger.warning("TF-IDF matrix is empty - no matching terms found")
+            return 0.0
+        
         score = cosine_similarity(matrix[0], matrix[1])[0][0]
+        logger.info(f"TF-IDF score: {score:.4f} (cv_words={len(clean_cv.split())}, job_words={len(clean_job.split())})")
 
         return float(score)
 
@@ -71,6 +99,7 @@ class SimilarityService:
         cv_embedding = self.sbert_model.encode(clean_cv)
 
         score = cosine_similarity([job_embedding], [cv_embedding])[0][0]
+        logger.info(f"SBERT score: {score:.4f}")
 
         return float(score)
 
@@ -78,8 +107,8 @@ class SimilarityService:
         self,
         tfidf_score: float,
         sbert_score: float,
-        tfidf_weight: float = 0.4,
-        sbert_weight: float = 0.6
+        tfidf_weight: float = 0.5,
+        sbert_weight: float = 0.5
     ) -> float:
         """
         Calculate weighted hybrid score from TF-IDF and SBERT scores.
@@ -87,19 +116,22 @@ class SimilarityService:
         Args:
             tfidf_score: TF-IDF similarity score
             sbert_score: SBERT similarity score
-            tfidf_weight: Weight for TF-IDF (default 0.4)
-            sbert_weight: Weight for SBERT (default 0.6)
+            tfidf_weight: Weight for TF-IDF (default 0.5)
+            sbert_weight: Weight for SBERT (default 0.5)
 
         Returns:
-            Weighted hybrid score
+            Weighted hybrid score (0.0 to 1.0)
         """
-        return (tfidf_weight * tfidf_score) + (sbert_weight * sbert_score)
+        # Calculate base hybrid score with equal weights
+        hybrid = (tfidf_weight * tfidf_score) + (sbert_weight * sbert_score)
+        
+        return hybrid
 
     def calculate_match_percentage(self, hybrid_score: float) -> float:
         """
         Convert hybrid score to a match percentage.
 
-        Uses direct multiplication to ensure consistent, deterministic scoring.
+        Uses linear scaling for transparency and interpretability.
         Same CV + same job will always produce the same score.
 
         Args:
@@ -108,7 +140,14 @@ class SimilarityService:
         Returns:
             Match percentage rounded to 2 decimal places (0 to 100)
         """
-        # Direct conversion - no transformation for consistent results
-        percentage = round(hybrid_score * 100, 2)
+        # Linear scaling - transparent and predictable
+        # If hybrid score is 0.75, match percentage is 75%
+        percentage = hybrid_score * 100
+        
+        # Clamp to valid range [0, 100]
+        percentage = max(0.0, min(100.0, percentage))
+        
+        # Round to 2 decimal places
+        percentage = round(percentage, 2)
         
         return percentage

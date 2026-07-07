@@ -279,7 +279,20 @@ def _clean_utf8(data):
         return [_clean_utf8(item) for item in data]
     elif isinstance(data, str):
         # Remove invalid UTF-8 characters
-        return data.encode('utf-8', 'replace').decode('utf-8')
+        cleaned = data.encode('utf-8', 'replace').decode('utf-8')
+        # Remove all problematic Unicode characters:
+        # - Private Use Area (U+E000-U+F8FF)
+        # - Supplementary Private Use Area (U+F0000-U+10FFFF)
+        # - Surrogate characters (U+D800-U+DFFF)
+        # - Variation Selectors (U+FE00-U+FE0F)
+        # - Combining characters that might cause issues
+        cleaned = ''.join(
+            char for char in cleaned 
+            if (ord(char) < 0xE000 or ord(char) > 0xF8FF) and  # Private use area
+               (ord(char) < 0xD800 or ord(char) > 0xDFFF) and  # Surrogates
+               (ord(char) < 0xFE00 or ord(char) > 0xFE0F)      # Variation selectors
+        )
+        return cleaned
     return data
 
 

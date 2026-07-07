@@ -288,31 +288,34 @@
                                 <p class="font-semibold text-gray-700 text-xs mb-2">AI Job Recommendations</p>
                                 <div class="space-y-2">
                                     @foreach($cv->recommendations as $rec)
-                                    <div class="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-gray-100">
-                                        <div class="flex items-center gap-2 min-w-0">
-                                            <span class="text-xs font-bold text-gray-400 w-4 flex-shrink-0">#{{ $rec['rank'] ?? $loop->iteration }}</span>
-                                            <span class="text-sm font-semibold text-gray-800 truncate">{{ $rec['job_title'] }}</span>
-                                        </div>
-                                        <div class="flex items-center gap-3 flex-shrink-0 ml-2">
-                                            <span class="text-xs font-bold {{ ($rec['confidence'] ?? 0) >= 80 ? 'text-green-600' : (($rec['confidence'] ?? 0) >= 50 ? 'text-yellow-500' : 'text-red-400') }}">
-                                                {{ $rec['confidence'] ?? 0 }}%
-                                            </span>
+                                    <div>
+                                        {{-- Clickable row --}}
+                                        <button type="button" onclick="toggleRecDetail('rec-detail-{{ $cv->id }}-{{ $loop->index }}')"
+                                           class="w-full flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-gray-100 hover:bg-gray-50 transition-colors text-left">
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <span class="text-xs font-bold text-gray-400 w-4 flex-shrink-0">#{{ $rec['rank'] ?? $loop->iteration }}</span>
+                                                <span class="text-sm font-semibold text-gray-800 truncate">{{ $rec['job_title'] }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                <span class="text-xs font-bold {{ ($rec['confidence'] ?? 0) >= 80 ? 'text-green-600' : (($rec['confidence'] ?? 0) >= 50 ? 'text-yellow-500' : 'text-red-400') }}">
+                                                    {{ $rec['confidence'] ?? 0 }}%
+                                                </span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                                </svg>
+                                            </div>
+                                        </button>
+                                        {{-- Hidden detail (reasoning) --}}
+                                        <div id="rec-detail-{{ $cv->id }}-{{ $loop->index }}" class="hidden px-3 py-2 text-xs text-gray-500 italic bg-white rounded-b-lg border-x border-b border-gray-100">
                                             @if(!empty($rec['reasoning']))
-                                            <span class="text-xs text-gray-400 italic max-w-[200px] truncate hidden md:block" title="{{ $rec['reasoning'] }}">
                                                 {{ $rec['reasoning'] }}
-                                            </span>
+                                            @else
+                                                No additional details available.
                                             @endif
                                         </div>
                                     </div>
                                     @endforeach
                                 </div>
-                                @if(!empty($cv->recommendations[0]['supporting_skills']))
-                                <div class="mt-2 flex flex-wrap gap-1">
-                                    @foreach($cv->recommendations[0]['supporting_skills'] as $skill)
-                                    <span class="inline-block bg-[#E8EAFF] text-[#4B52B0] text-[10px] font-medium px-2 py-0.5 rounded-full">{{ $skill }}</span>
-                                    @endforeach
-                                </div>
-                                @endif
                             @else
                                 <div class="flex items-center gap-2 text-gray-400 text-xs py-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -394,6 +397,14 @@
 
     // ===== Toggle Recommendations Panel =====
     function toggleRec(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.toggle('hidden');
+        }
+    }
+
+    // ===== Toggle Recommendation Detail (reasoning) =====
+    function toggleRecDetail(id) {
         const el = document.getElementById(id);
         if (el) {
             el.classList.toggle('hidden');

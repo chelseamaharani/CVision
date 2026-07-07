@@ -321,29 +321,46 @@ class ResumeParsingService
                 break;
             }
 
-            // Detect education entries
-            $eduKeywords2 = ['university', 'college', 'institute', 'universitas', 'sekolah',
-                           'sma', 'smk', 's1', 's2', 'd3', 'd4', 'bachelor', 'master',
-                           'diploma', 'degree', 'gelar', 'sarjana'];
-
-            $isEduLine = false;
-            foreach ($eduKeywords2 as $kw) {
-                if (str_contains($lower, $kw) && strlen($line) > 10) {
-                    $isEduLine = true;
-                    break;
-                }
+            // Skip section headers and short lines
+            if (strlen($line) < 10) {
+                continue;
             }
 
-            if ($isEduLine) {
-                $yearPattern = '/(\d{4})\s*[-–]\s*(\d{4}|present|now)/i';
-                $year = '';
-                if (preg_match($yearPattern, $line, $yearMatches)) {
-                    $year = $yearMatches[0];
-                }
+            // Detect degree level from line - check for specific patterns
+            $degree = '';
+            $institution = $line;
+            $year = '';
 
+            // Extract year if present
+            $yearPattern = '/(\d{4})\s*[-–]\s*(\d{4}|present|now|saat\s*ini)/i';
+            if (preg_match($yearPattern, $line, $yearMatches)) {
+                $year = $yearMatches[0];
+            }
+
+            // Check for degree keywords in order of specificity
+            // Use preg_match to find degree abbreviation in the line
+            // Note: Check D3/D4 before S1/S2 to avoid matching wrong degree
+            if (preg_match('/(d3|d4|d1|d2)/i', $line, $degMatch)) {
+                $degree = strtoupper($degMatch[1]);
+            } elseif (preg_match('/(s1|s2|s3)/i', $line, $degMatch)) {
+                $degree = strtoupper($degMatch[1]);
+            } elseif (preg_match('/(sma|smk)/i', $line, $degMatch)) {
+                $degree = strtoupper($degMatch[1]);
+            } elseif (preg_match('/(bachelor)/i', $line)) {
+                $degree = 'Bachelor';
+            } elseif (preg_match('/(master)/i', $line)) {
+                $degree = 'Master';
+            } elseif (preg_match('/(doctor|phd)/i', $line)) {
+                $degree = 'Doctor';
+            } elseif (preg_match('/(diploma)/i', $line)) {
+                $degree = 'Diploma';
+            }
+
+            // If degree found, add to education list
+            if ($degree) {
                 $education[] = [
-                    'degree'      => $lines[$i - 1] ?? '',
-                    'institution' => $line,
+                    'degree'      => $degree,
+                    'institution' => $institution,
                     'year'        => $year,
                     'gpa'         => '',
                 ];

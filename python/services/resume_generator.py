@@ -25,7 +25,8 @@ class ResumeGenerator:
     def generate_structured_resume(self, cv_text: str) -> dict[str, Any]:
         """
         Generate a structured resume from raw CV text.
-        Uses Gemini if available, otherwise falls back to regex extraction.
+        Uses rule-based extraction to avoid wasting Gemini tokens.
+        Gemini is reserved for job recommendations and skill gap analysis only.
 
         Args:
             cv_text: Raw text extracted from PDF
@@ -33,19 +34,24 @@ class ResumeGenerator:
         Returns:
             Structured resume dictionary
         """
-        # Try Gemini first
-        if self.gemini_client:
-            try:
-                result = self.gemini_client.generate_resume_json(cv_text)
-                if result and result.get("success"):
-                    logger.info("Gemini resume generation successful")
-                    return result["data"]
-            except Exception as e:
-                logger.warning(f"Gemini resume generation failed, using fallback: {e}")
-
-        # Fallback: rule-based extraction
-        logger.info("Using fallback resume extraction")
-        return self._extract_resume_fallback(cv_text)
+        # Use rule-based extraction directly (no Gemini) to save tokens
+        logger.info("Using rule-based resume extraction (Gemini tokens saved)")
+        try:
+            return self._extract_resume_fallback(cv_text)
+        except Exception as e:
+            logger.error(f"Resume extraction failed: {e}")
+            # Return minimal resume structure
+            return {
+                "name": "Unknown",
+                "email": "",
+                "phone": "",
+                "summary": "Unable to extract resume information.",
+                "experience": [],
+                "education": [],
+                "skills": [],
+                "raw_text": cv_text[:1000] if cv_text else "",
+                "generated_at": datetime.now().isoformat()
+            }
 
     def _extract_resume_fallback(self, cv_text: str) -> dict[str, Any]:
         """
@@ -57,6 +63,17 @@ class ResumeGenerator:
         Returns:
             Structured resume dictionary
         """
+        # Import preprocessing function for resume parsing
+        from .text_processor import preprocess_text_for_resume
+        
+        # Clean UTF-8 encoding to prevent issues
+        cv_text = cv_text.encode('utf-8', 'replace').decode('utf-8')
+        # Remove problematic Unicode characters (private use area, etc.)
+        cv_text = ''.join(char if ord(char) < 0xF000 else ' ' for char in cv_text)
+        
+        # Use resume-specific preprocessing (preserves newlines for section detection)
+        cv_text = preprocess_text_for_resume(cv_text)
+        
         lines = cv_text.split('\n')
         lines = [l.strip() for l in lines if l.strip()]
 
@@ -217,16 +234,16 @@ class ResumeGenerator:
         lines.append("")
         
         # Name & Contact
-        lines.append(structured_resume.get('name', 'Unknown').upper())
+        lines.append(self._clean_text(structured_resume.get('name', 'Unknown').upper()))
         lines.append("-" * 40)
         if structured_resume.get('email'):
-            lines.append(f"Email: {structured_resume['email']}")
+            lines.append(f"Email: {self._clean_text(structured_resume['email'])}")
         if structured_resume.get('phone'):
-            lines.append(f"Phone: {structured_resume['phone']}")
+            lines.append(f"Phone: {self._clean_text(structured_resume['phone'])}")
         lines.append("")
         
         # Professional Summary
-        summary = structured_resume.get('summary', '')
+        summary = self._clean_text(structured_resume.get('summary', ''))
         if summary:
             lines.append("PROFESSIONAL SUMMARY")
             lines.append("-" * 40)
@@ -240,13 +257,13 @@ class ResumeGenerator:
             lines.append("-" * 40)
             for exp in experience:
                 if exp.get('title'):
-                    lines.append(f"• {exp['title']}")
+                    lines.append(f"* {self._clean_text(exp['title'])}")
                 if exp.get('company'):
-                    lines.append(f"  {exp['company']}")
+                    lines.append(f"  {self._clean_text(exp['company'])}")
                 if exp.get('period'):
-                    lines.append(f"  {exp['period']}")
+                    lines.append(f"  {self._clean_text(exp['period'])}")
                 for desc in exp.get('description', []):
-                    lines.append(f"  - {desc}")
+                    lines.append(f"  - {self._clean_text(desc)}")
                 lines.append("")
         
         # Education
@@ -257,13 +274,13 @@ class ResumeGenerator:
             for edu in education:
                 line_parts = []
                 if edu.get('degree'):
-                    line_parts.append(edu['degree'])
+                    line_parts.append(self._clean_text(edu['degree']))
                 if edu.get('institution'):
-                    line_parts.append(edu['institution'])
+                    line_parts.append(self._clean_text(edu['institution']))
                 if edu.get('year'):
-                    line_parts.append(f"({edu['year']})")
+                    line_parts.append(f"({self._clean_text(edu['year'])})")
                 if line_parts:
-                    lines.append(f"• {' - '.join(line_parts)}")
+                    lines.append(f"* {' - '.join(line_parts)}")
             lines.append("")
         
         # Skills
@@ -271,7 +288,7 @@ class ResumeGenerator:
         if skills:
             lines.append("SKILLS")
             lines.append("-" * 40)
-            lines.append(f"{', '.join(skills)}")
+            lines.append(f"{', '.join(self._clean_text(s) for s in skills)}")
             lines.append("")
         
         lines.append("=" * 60)
@@ -279,4 +296,24 @@ class ResumeGenerator:
         lines.append(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
         lines.append("=" * 60)
         
-        return '\n'.join(lines)
+        # Join and ensure UTF-8 encoding
+        result = '\n'.join(lines)
+        result = result.encode('utf-8', 'replace').decode('utf-8')
+        # Remove any remaining problematic characters
+        result = ''.join(char if ord(char) >= 32 or char in '\n\r\t' else ' ' for char in result)
+        return result
+
+    def _clean_text(self, text: str) -> str:
+        """Clean text by removing problematic Unicode characters."""
+        if not text:
+            return text
+        # Encode to UTF-8, replacing invalid characters
+        cleaned = text.encode('utf-8', 'replace').decode('utf-8')
+        # Remove private use area characters and other problematic ranges
+        cleaned = ''.join(
+            char for char in cleaned 
+            if (ord(char) < 0xE000 or ord(char) > 0xF8FF) and  # Private use area
+               (ord(char) < 0xD800 or ord(char) > 0xDFFF) and  # Surrogates
+               (ord(char) < 0xFE00 or ord(char) > 0xFE0F)      # Variation selectors
+        )
+        return cleaned

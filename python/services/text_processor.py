@@ -9,22 +9,75 @@ import re
 def preprocess_text(text: str) -> str:
     """
     Clean and normalize text for similarity analysis.
+    
+    IMPORTANT: This function removes newlines because TF-IDF and SBERT
+    need continuous text for proper similarity calculation.
+    For resume parsing (section detection), use the raw text instead.
 
     - Lowercases text
-    - Removes special characters (keeps alphanumeric and spaces)
-    - Collapses multiple whitespace into single space
-    - Strips leading/trailing whitespace
+    - Removes newlines (similarity algorithms need continuous text)
+    - Keeps non-ASCII characters (for Indonesian/English text)
+    - Removes only control characters
+    - Normalizes whitespace
 
     Args:
         text: Raw text to preprocess
 
     Returns:
-        Cleaned and normalized text
+        Cleaned and normalized text (single line, no newlines)
     """
+    # Normalize common technical terms to preserve them
+    text = text.replace('C++', 'cplusplus')
+    text = text.replace('C#', 'csharp')
+    text = text.replace('Node.js', 'nodejs')
+    text = text.replace('.NET', 'dotnet')
+    text = text.replace('ASP.NET', 'aspnet')
+    
+    # Lowercase
     text = text.lower()
-    text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)
+    
+    # Remove control characters (ASCII 0-31) including newlines
+    # TF-IDF and SBERT need continuous text, not structured text
+    text = ''.join(char if ord(char) >= 32 else ' ' for char in text)
+    
+    # Normalize all whitespace to single spaces
     text = re.sub(r'\s+', ' ', text)
+    
     return text.strip()
+
+
+def preprocess_text_for_resume(text: str) -> str:
+    """
+    Clean text for resume parsing while preserving structure.
+    
+    This function preserves newlines because resume parsing needs them
+    for section detection (EXPERIENCE, EDUCATION, SKILLS sections).
+
+    Args:
+        text: Raw CV text
+
+    Returns:
+        Cleaned text with newlines preserved
+    """
+    # Normalize common technical terms
+    text = text.replace('C++', 'cplusplus')
+    text = text.replace('C#', 'csharp')
+    text = text.replace('Node.js', 'nodejs')
+    text = text.replace('.NET', 'dotnet')
+    text = text.replace('ASP.NET', 'aspnet')
+    
+    # Lowercase
+    text = text.lower()
+    
+    # Remove ONLY control characters except newline and tab
+    text = ''.join(char if (ord(char) >= 32 or char in '\n\t') else ' ' for char in text)
+    
+    # Normalize spaces per line (don't remove newlines)
+    lines = text.split('\n')
+    lines = [re.sub(r'[ \t]+', ' ', line).strip() for line in lines]
+    text = '\n'.join(lines)
+    
+    return text
 
 
 def extract_skills(text: str, skill_list: list[str]) -> list[str]:
@@ -83,32 +136,43 @@ def extract_education_level(text: str) -> str:
     """
     text_lower = text.lower()
     
-    # PhD / S3
+    # Find all matching education levels with their priority
+    found_levels = []
+    
+    # PhD / S3 (highest)
     if any(term in text_lower for term in ['phd', 'doctorate', 'doctoral', 'ph.d', 's3']):
-        return 'S3'
+        found_levels.append('S3')
     
     # Master / S2
     if any(term in text_lower for term in ['master', "master's", 'masters', 'm.sc', 'm.a', 'msc', 'ma', 's2']):
-        return 'S2'
+        found_levels.append('S2')
     
     # Bachelor / S1
     if any(term in text_lower for term in ['bachelor', "bachelor's", 'bachelors', 'b.sc', 'b.a', 'bsc', 'ba', 's1', 'undergraduate', 'sarjana']):
-        return 'S1'
+        found_levels.append('S1')
     
     # D4
     if any(term in text_lower for term in ['d4', 'diploma 4', 'diploma iv']):
-        return 'D4'
+        found_levels.append('D4')
     
     # D3
     if any(term in text_lower for term in ['d3', 'diploma 3', 'diploma iii', 'associate degree']):
-        return 'D3'
+        found_levels.append('D3')
     
     # SMA/SMK (High School)
     if any(term in text_lower for term in ['sma', 'smk', 'high school', 'secondary school', 'senior high']):
-        return 'SMA/SMK'
+        found_levels.append('SMA/SMK')
     
     # SMP (Junior High School)
     if any(term in text_lower for term in ['smp', 'junior high', 'middle school']):
-        return 'SMP'
+        found_levels.append('SMP')
+    
+    # Return the highest level found (first in priority order)
+    # Priority: S3 > S2 > S1 > D4 > D3 > SMA/SMK > SMP
+    priority_order = ['S3', 'S2', 'S1', 'D4', 'D3', 'SMA/SMK', 'SMP']
+    
+    for level in priority_order:
+        if level in found_levels:
+            return level
     
     return 'Unknown'
