@@ -45,6 +45,8 @@ class GeminiAIService implements AIService
         string $jobDescription,
         array $requiredSkills = [],
         string $jobTitle = 'Unknown Position',
+        ?float $minExperienceYears = null,
+        ?string $requiredEducation = null,
     ): CVScoreResult {
         $startTime = microtime(true);
 
@@ -52,10 +54,12 @@ class GeminiAIService implements AIService
             $response = Http::timeout($this->timeout)
                 ->asForm()
                 ->post("{$this->engineUrl}/api/cv/analyze-text", [
-                    'cv_text'          => $cvText,
-                    'job_description'  => $jobDescription,
-                    'required_skills'  => implode(',', $requiredSkills),
-                    'job_title'        => $jobTitle,
+                    'cv_text'             => $cvText,
+                    'job_description'     => $jobDescription,
+                    'required_skills'     => implode(',', $requiredSkills),
+                    'job_title'           => $jobTitle,
+                    'min_experience'      => $minExperienceYears,
+                    'required_education'  => $requiredEducation,
                 ]);
 
             $duration = round((microtime(true) - $startTime) * 1000, 2);

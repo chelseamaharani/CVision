@@ -1,4 +1,7 @@
 import sys, fitz
 doc = fitz.open(sys.argv[1])
-print(doc[0].get_text() if doc else "")
+text = ""
+for page in doc:
+    text += page.get_text()
+print(text)
 doc.close()

@@ -20,7 +20,7 @@ class GeminiClient:
     Includes retry logic with exponential backoff for rate limiting.
     """
 
-    def __init__(self, api_key: str, model: str = "gemini-2.5-flash-lite"):
+    def __init__(self, api_key: str, model: str = "gemini-3.1-flash-lite"):
         """
         Initialize the Gemini client.
 

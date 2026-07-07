@@ -23,7 +23,17 @@ class LandingPagePelamarController extends Controller
             $riwayatCv = auth()->user()->cvs()
                 ->with('uploadJob', 'matchingResult')
                 ->latest()
-                ->get();
+                ->get()
+                ->map(function ($cv) {
+                    // Parse recommendation JSON dari matching result
+                    $recommendations = [];
+                    if ($cv->matchingResult && $cv->matchingResult->recommendation) {
+                        $recData = json_decode($cv->matchingResult->recommendation, true);
+                        $recommendations = $recData['recommendations'] ?? [];
+                    }
+                    $cv->recommendations = $recommendations;
+                    return $cv;
+                });
         }
 
         return view('pages.landing_page_pelamar', compact('jobs', 'riwayatCv'));
@@ -40,17 +50,14 @@ class LandingPagePelamarController extends Controller
         ]);
 
         try {
-            // Save the uploaded file
             $path = $request->file('cv_file')->store('cv_uploads', 'public');
 
-            // Create CV record
             $cv = auth()->user()->cvs()->create([
                 'upload_job_id' => $request->upload_job_id,
                 'file_path'     => $path,
                 'file_name'     => $request->file('cv_file')->getClientOriginalName(),
             ]);
 
-            // Dispatch async AI processing job
             ProcessCVJob::dispatch($cv);
 
             Log::info("CV #{$cv->id} uploaded and queued for AI processing", [
@@ -58,7 +65,7 @@ class LandingPagePelamarController extends Controller
                 'file'   => $cv->file_name,
             ]);
 
-            return back()->with('success', 'CV uploaded successfully! AI analysis is in progress. Please check back later for results.');
+            return back()->with('success', 'CV uploaded successfully! AI analysis is in progress. Check the history tab for recommendations.');
 
         } catch (\Throwable $e) {
             Log::error('CV upload failed: ' . $e->getMessage(), [
@@ -76,12 +83,10 @@ class LandingPagePelamarController extends Controller
     {
         $cv = auth()->user()->cvs()->findOrFail($id);
 
-        // Hapus matching result jika ada
         if ($cv->matchingResult) {
             $cv->matchingResult->delete();
         }
 
-        // Hapus file
         \Illuminate\Support\Facades\Storage::disk('public')->delete($cv->file_path);
 
         $cv->delete();

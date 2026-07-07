@@ -4,15 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\MatchingResult;
 use App\Services\CVExtractionService;
-use App\Services\AIService;
-use Illuminate\Support\Facades\Http;
+use App\Services\ResumeParsingService;
 use Illuminate\Support\Facades\Log;
 
 class CandidateResumeController extends Controller
 {
     public function __construct(
         private readonly CVExtractionService $extractionService,
-        private readonly AIService $aiService,
+        private readonly ResumeParsingService $resumeParsingService,
     ) {}
 
     /**
@@ -62,95 +61,75 @@ class CandidateResumeController extends Controller
             ? 'Top ' . round((($totalResults - $betterResults) / $totalResults) * 100) . '%'
             : '';
 
-        // Extract CV text and generate structured resume
+        // Extract CV text and generate structured resume (LOCAL - no external API calls)
         $cvText = null;
         $structuredResume = null;
         $resumeText = null;
         
         try {
-            if ($result->cv->file_path && file_exists(storage_path('app/' . $result->cv->file_path))) {
-                $cvText = $this->extractionService->extract(storage_path('app/' . $result->cv->file_path));
+            if ($result->cv->file_path) {
+                // CVExtractionService expects path relative to 'public' disk
+                $cvText = $this->extractionService->extract($result->cv->file_path);
                 $cvText = mb_convert_encoding($cvText, 'UTF-8', 'UTF-8');
                 
-                // Generate structured resume via AI Engine
-                if ($this->aiService->isHealthy()) {
-                    $engineUrl = config('services.ai.engine_url', 'http://127.0.0.1:8000');
-                    
-                    // Get structured resume JSON
-                    $resumeResponse = Http::timeout(60)
-                        ->asForm()
-                        ->post("{$engineUrl}/api/cv/generate-resume", [
-                            'cv_text' => $cvText,
-                        ]);
-                    
-                    if ($resumeResponse->successful()) {
-                        $resumeData = $resumeResponse->json();
-                        if ($resumeData['success'] ?? false) {
-                            $structuredResume = $resumeData['data'];
-                        }
-                    }
-                    
-                    // Get formatted resume text for download
-                    $textResponse = Http::timeout(60)
-                        ->asForm()
-                        ->post("{$engineUrl}/api/cv/generate-resume-text", [
-                            'cv_text' => $cvText,
-                        ]);
-                    
-                    if ($textResponse->successful()) {
-                        $textData = $textResponse->json();
-                        if ($textData['success'] ?? false) {
-                            $resumeText = $textData['content'] ?? null;
-                        }
-                    }
-                }
+                // Parse resume locally using pure regex (NO Gemini API needed!)
+                $structuredResume = $this->resumeParsingService->parse($cvText);
+                $resumeText = $this->resumeParsingService->toText($structuredResume);
             }
         } catch (\Throwable $e) {
-            Log::warning("Failed to generate structured resume: {$e->getMessage()}");
+            Log::warning("Failed to parse resume: {$e->getMessage()}");
         }
 
-        $candidate = [
-            'name'              => $name,
-            'position'          => $result->uploadJob->title ?? '',
-            'cv_id'             => 'CV-' . now()->format('Y') . '-' . str_pad($result->cv_id, 5, '0', STR_PAD_LEFT),
-            'email'             => $result->cv->user->email ?? '-',
-            'phone'             => '-',
-            'location'          => '-',
-            'score'             => $result->score,
-            'rank'              => $result->rank,
-            'status'            => $status,
-            'percentile'        => $percentile,
+         // Use parsed data from ResumeParsingService if available
+         $phone = $structuredResume['phone'] ?? '-';
+         $location = $structuredResume['address'] ?? '-';
+         $experience = $structuredResume['experience'] ?? [];
+         $educationList = $structuredResume['education'] ?? [];
+         
+         $candidate = [
+             'name'              => $name,
+             'position'          => $result->uploadJob->title ?? '',
+             'cv_id'             => 'CV-' . now()->format('Y') . '-' . str_pad($result->cv_id, 5, '0', STR_PAD_LEFT),
+             'email'             => $result->cv->user->email ?? '-',
+             'phone'             => $phone,
+             'location'          => $location,
+             'score'             => $result->score,
+             'rank'              => $result->rank,
+             'status'            => $status,
+             'percentile'        => $percentile,
 
-            // AI Analysis Results
-            'skills_matched'    => $result->skills_matched ?? [],
-            'skills_total'      => $result->skills_total ?? count($result->skills_matched ?? []) + count($result->skill_gap ?? []),
-            'skills_count'      => $result->skills_count ?? count($result->skills_matched ?? []),
-            'skill_gap'         => is_array($result->skill_gap)
-                ? implode(', ', $result->skill_gap)
-                : ($result->skill_gap ?? ''),
-            'experience_years'  => $result->experience_years ? $result->experience_years . ' Years' : 'N/A',
-            'education'         => $result->education_match ?? 'Unknown',
+             // AI Analysis Results
+             'skills_matched'    => $result->skills_matched ?? [],
+             'skills_total'      => $result->skills_total ?? count($result->skills_matched ?? []) + count($result->skill_gap ?? []),
+             'skills_count'      => $result->skills_count ?? count($result->skills_matched ?? []),
+             'skill_gap'         => is_array($result->skill_gap)
+                 ? implode(', ', $result->skill_gap)
+                 : ($result->skill_gap ?? ''),
+             'experience_years'  => $result->experience_years ? $result->experience_years . ' Years' : 'N/A',
+             'education'         => $result->education_match ?? 'Unknown',
 
-            // Detailed AI Scores
-            'tfidf_score'       => $result->tfidf_score,
-            'sbert_score'       => $result->sbert_score,
-            'hybrid_score'      => $result->hybrid_score,
-            'similarity'        => $result->similarity_score ?? $result->hybrid_score,
+             // Detailed AI Scores
+             'tfidf_score'       => $result->tfidf_score,
+             'sbert_score'       => $result->sbert_score,
+             'hybrid_score'      => $result->hybrid_score,
+             'similarity'        => $result->similarity_score ?? $result->hybrid_score,
 
-            // Recommendation
-            'recommendations'   => $recommendations,
-            'recommendation'    => !empty($recommendations)
-                ? 'Based on AI analysis, this candidate is recommended for positions that match their skills and experience.'
-                : 'AI recommendation not available.',
+             // Recommendation
+             'recommendations'   => $recommendations,
+             'recommendation'    => !empty($recommendations)
+                 ? 'Based on AI analysis, this candidate is recommended for positions that match their skills and experience.'
+                 : 'AI recommendation not available.',
 
-            // Files & Resume
-            'cv_path'           => $result->cv->file_path,
-            'cv_id_display'     => $result->cv_id,
-            'cv_text'           => $cvText ? mb_substr($cvText, 0, 5000) : null,
-            'structured_resume' => $structuredResume,
-            'resume_text'       => $resumeText,
-            'experience'        => [],
-        ];
+             // Files & Resume
+             'cv_path'           => $result->cv->file_path,
+             'cv_id_display'     => $result->cv_id,
+             'cv_text'           => $cvText ? mb_substr($cvText, 0, 5000) : null,
+             'structured_resume' => $structuredResume,
+             'resume_text'       => $resumeText,
+             'experience'        => $experience,
+             'education_list'    => $educationList,
+         ];
+
 
         return view('pages.candidate_resume', compact('candidate'));
     }

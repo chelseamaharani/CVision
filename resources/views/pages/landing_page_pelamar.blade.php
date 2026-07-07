@@ -228,51 +228,100 @@
                 <div class="mt-5 flex flex-col gap-3">
 
                     @forelse($riwayatCv as $cv)
-                    <div class="flex items-center gap-3 border border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50 transition-colors">
-
-                        {{-- File icon --}}
-                        <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 {{ str_ends_with(strtolower($cv->file_name), '.pdf') ? 'bg-red-50' : 'bg-blue-50' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ str_ends_with(strtolower($cv->file_name), '.pdf') ? 'text-red-500' : 'text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                        </div>
-
-                        {{-- Info --}}
-                        <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-gray-800 text-sm truncate">{{ $cv->uploadJob->title ?? 'Unknown Position' }}</p>
-                            <p class="text-gray-400 text-xs truncate">{{ $cv->file_name }}</p>
-                        </div>
-
-                        {{-- Date --}}
-                        <div class="hidden sm:flex items-center gap-1.5 text-gray-400 text-xs flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span>{{ $cv->created_at->format('M d, Y') }}<br>{{ $cv->created_at->format('H:i') }}</span>
-                        </div>
-
-                        {{-- Actions --}}
-                        <div class="flex items-center gap-2 flex-shrink-0">
-                            <a href="{{ asset('storage/' . $cv->file_path) }}" target="_blank"
-                               class="flex items-center gap-1 text-[#4B52B0] text-xs font-semibold hover:underline">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    <div class="border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
+                        {{-- Main row --}}
+                        <div class="flex items-center gap-3 px-4 py-3">
+                            {{-- File icon --}}
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 {{ str_ends_with(strtolower($cv->file_name), '.pdf') ? 'bg-red-50' : 'bg-blue-50' }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ str_ends_with(strtolower($cv->file_name), '.pdf') ? 'text-red-500' : 'text-blue-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
-                                View
-                            </a>
-                            <form action="{{ route('cv.destroy', $cv->id) }}" method="POST" onsubmit="return confirm('Delete this CV?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="flex items-center gap-1 text-red-500 text-xs font-semibold hover:underline">
+                            </div>
+
+                            {{-- Info --}}
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-gray-800 text-sm truncate">{{ $cv->uploadJob->title ?? 'Unknown Position' }}</p>
+                                <p class="text-gray-400 text-xs truncate">{{ $cv->file_name }}</p>
+                            </div>
+
+                            {{-- Date --}}
+                            <div class="hidden sm:flex items-center gap-1.5 text-gray-400 text-xs flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>{{ $cv->created_at->format('M d, Y') }}<br>{{ $cv->created_at->format('H:i') }}</span>
+                            </div>
+
+                            {{-- Actions --}}
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <a href="{{ asset('storage/' . $cv->file_path) }}" target="_blank"
+                                   class="flex items-center gap-1 text-[#4B52B0] text-xs font-semibold hover:underline">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
-                                    Delete
+                                    View
+                                </a>
+                                <button type="button" onclick="toggleRec('rec-{{ $cv->id }}')"
+                                   class="flex items-center gap-1 text-[#4B52B0] text-xs font-semibold hover:underline">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                    </svg>
+                                    Recommendations
                                 </button>
-                            </form>
+                                <form action="{{ route('cv.destroy', $cv->id) }}" method="POST" onsubmit="return confirm('Delete this CV?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="flex items-center gap-1 text-red-500 text-xs font-semibold hover:underline">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
                         </div>
 
+                        {{-- Recommendations panel --}}
+                        <div id="rec-{{ $cv->id }}" class="hidden border-t border-gray-100 px-4 py-3 bg-[#F8F9FF]">
+                            @if(!empty($cv->recommendations))
+                                <p class="font-semibold text-gray-700 text-xs mb-2">AI Job Recommendations</p>
+                                <div class="space-y-2">
+                                    @foreach($cv->recommendations as $rec)
+                                    <div class="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-gray-100">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <span class="text-xs font-bold text-gray-400 w-4 flex-shrink-0">#{{ $rec['rank'] ?? $loop->iteration }}</span>
+                                            <span class="text-sm font-semibold text-gray-800 truncate">{{ $rec['job_title'] }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 flex-shrink-0 ml-2">
+                                            <span class="text-xs font-bold {{ ($rec['confidence'] ?? 0) >= 80 ? 'text-green-600' : (($rec['confidence'] ?? 0) >= 50 ? 'text-yellow-500' : 'text-red-400') }}">
+                                                {{ $rec['confidence'] ?? 0 }}%
+                                            </span>
+                                            @if(!empty($rec['reasoning']))
+                                            <span class="text-xs text-gray-400 italic max-w-[200px] truncate hidden md:block" title="{{ $rec['reasoning'] }}">
+                                                {{ $rec['reasoning'] }}
+                                            </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                @if(!empty($cv->recommendations[0]['supporting_skills']))
+                                <div class="mt-2 flex flex-wrap gap-1">
+                                    @foreach($cv->recommendations[0]['supporting_skills'] as $skill)
+                                    <span class="inline-block bg-[#E8EAFF] text-[#4B52B0] text-[10px] font-medium px-2 py-0.5 rounded-full">{{ $skill }}</span>
+                                    @endforeach
+                                </div>
+                                @endif
+                            @else
+                                <div class="flex items-center gap-2 text-gray-400 text-xs py-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>AI analysis is still in progress or no recommendations available yet.</span>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                     @empty
                     <p class="text-center text-gray-400 text-sm py-10">No CVs uploaded yet.</p>
@@ -341,6 +390,14 @@
         cvFileInput.value = '';
         dropzone.classList.remove('hidden');
         filePreview.classList.add('hidden');
+    }
+
+    // ===== Toggle Recommendations Panel =====
+    function toggleRec(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.toggle('hidden');
+        }
     }
 
     // Drag & drop support

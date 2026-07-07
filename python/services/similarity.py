@@ -97,10 +97,10 @@ class SimilarityService:
 
     def calculate_match_percentage(self, hybrid_score: float) -> float:
         """
-        Convert hybrid score to a match percentage using power transformation.
+        Convert hybrid score to a match percentage.
 
-        Uses square root transformation to map typical scores (0.3-0.7) to a more
-        reasonable percentage range (55-85%) while maintaining relative ordering.
+        Uses direct multiplication to ensure consistent, deterministic scoring.
+        Same CV + same job will always produce the same score.
 
         Args:
             hybrid_score: Hybrid similarity score (0.0 to 1.0)
@@ -108,17 +108,7 @@ class SimilarityService:
         Returns:
             Match percentage rounded to 2 decimal places (0 to 100)
         """
-        # Apply power transformation (square root) to boost the percentage
-        # This maps typical scores to more reasonable percentages:
-        # - 0.3 -> 54.77%
-        # - 0.4 -> 63.25%
-        # - 0.5 -> 70.71%
-        # - 0.6 -> 77.46%
-        # - 0.7 -> 83.67%
-        # - 0.8 -> 89.44%
-        transformed_score = hybrid_score ** 0.5
-        
-        # Convert to percentage
-        percentage = round(transformed_score * 100, 2)
+        # Direct conversion - no transformation for consistent results
+        percentage = round(hybrid_score * 100, 2)
         
         return percentage

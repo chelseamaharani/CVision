@@ -68,6 +68,8 @@ class CVScoreService
             jobDescription: $job->description,
             requiredSkills: $job->skills_array,
             jobTitle: $job->title,
+            minExperienceYears: $job->min_experience ? (float) $job->min_experience : null,
+            requiredEducation: $job->education_requirement ?: null,
         );
 
         // Step 3: Cache the result (TTL: 1 hour)

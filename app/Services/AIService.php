@@ -19,6 +19,8 @@ interface AIService
      * @param string $jobDescription Job description text
      * @param array  $requiredSkills List of required skills (optional)
      * @param string $jobTitle       Job title (optional)
+     * @param float|null $minExperienceYears Minimum required years of experience (optional)
+     * @param string|null $requiredEducation Required education level (optional)
      * @return CVScoreResult
      *
      * @throws \App\Exceptions\AIProcessingException
@@ -28,6 +30,8 @@ interface AIService
         string $jobDescription,
         array $requiredSkills = [],
         string $jobTitle = 'Unknown Position',
+        ?float $minExperienceYears = null,
+        ?string $requiredEducation = null,
     ): CVScoreResult;
 
     /**

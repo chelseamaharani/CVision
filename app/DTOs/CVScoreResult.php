@@ -18,6 +18,8 @@ class CVScoreResult
         public readonly ?array $skillGap = null,
         public readonly float $experienceYears = 0.0,
         public readonly string $educationLevel = 'Unknown',
+        public readonly ?float $minExperienceYears = null,
+        public readonly ?string $requiredEducation = null,
     ) {}
 
     /**
@@ -34,6 +36,8 @@ class CVScoreResult
             skillGap: $data['skill_gap'] ?? null,
             experienceYears: $data['experience_years'] ?? 0.0,
             educationLevel: $data['education_level'] ?? 'Unknown',
+            minExperienceYears: $data['min_experience'] ?? null,
+            requiredEducation: $data['required_education'] ?? null,
         );
     }
 

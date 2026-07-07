@@ -110,7 +110,7 @@ def calculate_match_percentage(hybrid_score):
 
     percentage = hybrid_score * 100
 
-    return round(percentage,2)
+    return round(percentage, 2)
 
 
 def generate_job_recommendation(cv_text):

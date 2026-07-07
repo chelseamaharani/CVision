@@ -289,6 +289,8 @@ async def analyze_cv_text(
     job_description: str = Form(...),
     required_skills: str = Form(default=""),
     job_title: str = Form(default="Unknown Position"),
+    min_experience: float = Form(default=0.0),
+    required_education: str = Form(default=""),
 ):
     """
     Analyze CV text directly (without PDF upload).
