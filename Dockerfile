@@ -38,7 +38,10 @@ WORKDIR /app
 # Copy application files
 COPY . .
 
-# Install PHP dependencies (production only, no dev)
+# Copy package-lock.json if exists (generate if not)
+RUN test -f package-lock.json || npm install --package-lock-only
+
+# Install PHP dependencies (production only)
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
@@ -46,10 +49,10 @@ RUN composer install \
     --no-scripts \
     && composer dump-autoload --optimize
 
-# Install & build frontend assets (limit Node memory)
-RUN NODE_OPTIONS="--max-old-space-size=256" npm install --no-optional --ignore-scripts \
-    && NODE_OPTIONS="--max-old-space-size=256" npm run build \
-    && rm -rf node_modules
+# Install & build frontend assets
+RUN NODE_OPTIONS="--max-old-space-size=512" npm ci && \
+    NODE_OPTIONS="--max-old-space-size=512" npm run build && \
+    rm -rf node_modules
 
 # Laravel optimization
 RUN php artisan config:cache \
