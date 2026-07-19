@@ -16,8 +16,8 @@ def preprocess_text(text: str) -> str:
 
     - Lowercases text
     - Removes newlines (similarity algorithms need continuous text)
-    - Keeps non-ASCII characters (for Indonesian/English text)
-    - Removes only control characters
+    - Removes invalid Unicode characters (Private Use Area, surrogates, etc.)
+    - Removes control characters
     - Normalizes whitespace
 
     Args:
@@ -35,6 +35,20 @@ def preprocess_text(text: str) -> str:
     
     # Lowercase
     text = text.lower()
+    
+    # Remove invalid Unicode characters that cause encoding errors:
+    # - Private Use Area (U+E000-U+F8FF)
+    # - Supplementary Private Use Area (U+F0000-U+10FFFF)
+    # - Surrogate characters (U+D800-U+DFFF)
+    # - Variation Selectors (U+FE00-U+FE0F)
+    # - Other problematic ranges
+    text = ''.join(
+        char for char in text 
+        if (ord(char) < 0xE000 or ord(char) > 0xF8FF) and  # Private use area
+           (ord(char) < 0xD800 or ord(char) > 0xDFFF) and  # Surrogates
+           (ord(char) < 0xFE00 or ord(char) > 0xFE0F) and  # Variation selectors
+           (ord(char) < 0xF0000 or ord(char) > 0x10FFFF)   # Supplementary private use
+    )
     
     # Remove control characters (ASCII 0-31) including newlines
     # TF-IDF and SBERT need continuous text, not structured text

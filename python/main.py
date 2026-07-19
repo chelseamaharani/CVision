@@ -7,9 +7,20 @@ Run with:
 """
 
 import os
+import sys
 import logging
 from pathlib import Path
 from contextlib import asynccontextmanager
+
+# Fix for Windows console encoding (cp1252) - enable UTF-8 output
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+    
+    # Also fix logging encoding
+    for handler in logging.root.handlers:
+        if hasattr(handler, 'stream'):
+            handler.stream.reconfigure(encoding='utf-8')
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -44,6 +55,22 @@ if not GEMINI_API_KEY:
 similarity_service: SimilarityService | None = None
 gemini_client: GeminiClient | None = None
 resume_generator: ResumeGenerator | None = None
+
+# Configure logging with UTF-8 encoding for Windows
+if sys.platform == 'win32':
+    # Remove default handlers
+    logging.root.handlers = []
+    
+    # Create UTF-8 console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ))
+    
+    # Configure root logger
+    logging.root.setLevel(logging.INFO)
+    logging.root.addHandler(console_handler)
 
 logger = logging.getLogger("cvision.ai")
 
@@ -112,6 +139,8 @@ async def analyze_cv(
     job_description: str = Form(...),
     required_skills: str = Form(default=""),
     job_title: str = Form(default="Unknown Position"),
+    min_experience: float = Form(default=0.0),
+    required_education: str = Form(default=""),
 ):
     """
     Analyze a CV against a job description.
@@ -191,6 +220,8 @@ async def analyze_cv(
         skill_gap=skill_gap,
         experience_years=experience_years,
         education_level=education_level,
+        min_experience=min_experience,
+        required_education=required_education,
     )
 
 
@@ -355,6 +386,8 @@ async def analyze_cv_text(
         skill_gap=skill_gap,
         experience_years=experience_years,
         education_level=education_level,
+        min_experience=min_experience,
+        required_education=required_education,
     )
 
 

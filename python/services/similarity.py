@@ -3,6 +3,7 @@ Similarity Calculation Service
 Provides TF-IDF, SBERT, and hybrid scoring for CV-job matching.
 """
 
+import sys
 import logging
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -10,6 +11,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 
 from .text_processor import preprocess_text
+
+# Fix for Windows console encoding (cp1252) - enable UTF-8 output
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
 
 logger = logging.getLogger(__name__)
 

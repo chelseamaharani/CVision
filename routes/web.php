@@ -20,7 +20,6 @@ Route::post('/logout',  [LoginController::class, 'logout'])->name('logout');
 Route::get('/register', [RegisterController::class, 'index'])->name('register');
 Route::post('/register',[RegisterController::class, 'register']);
 
-Route::get('/auth/google',     fn() => redirect('/login'))->name('auth.google');
 Route::get('/forgot-password', fn() => redirect('/login'))->name('password.request');
 
 // ===== ROOT (/) - Landing page pelamar, BISA diakses tanpa login =====

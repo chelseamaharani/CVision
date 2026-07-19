@@ -45,33 +45,7 @@ class CVExtractionService
      */
     private function extractPdf(string $path): string
     {
-        // Try using the AI Engine's PDF extraction via health check
-        $aiService = app(GeminiAIService::class);
-        if ($aiService->isHealthy()) {
-            try {
-                $pdfContent = file_get_contents($path);
-                if ($pdfContent === false) {
-                    throw new \RuntimeException("Cannot read PDF file: {$path}");
-                }
-
-                $response = \Illuminate\Support\Facades\Http::timeout(30)
-                    ->attach('cv_file', $pdfContent, basename($path))
-                    ->post(config('services.ai.engine_url', 'http://127.0.0.1:8000') . '/api/cv/analyze', [
-                        'job_description' => 'Placeholder for extraction only',
-                    ]);
-
-                if ($response->successful()) {
-                    // We only need the text, but the API returns scores too
-                    // For pure extraction, we'd need a dedicated endpoint
-                    // For now, we return the raw text via a different approach
-                    Log::info('PDF extraction via AI Engine succeeded');
-                }
-            } catch (\Throwable $e) {
-                Log::warning('AI Engine PDF extraction failed, using fallback: ' . $e->getMessage());
-            }
-        }
-
-        // Fallback: Use PHP PDF parser if available
+        // Use PHP PDF parser if available
         if (class_exists('\Smalot\PdfParser\Parser')) {
             try {
                 $parser = new \Smalot\PdfParser\Parser();
@@ -96,8 +70,24 @@ class CVExtractionService
     {
         $pythonPath = config('services.ai.python_path', base_path('venv/Scripts/python.exe'));
 
+        // Auto-detect Python on Windows if default path doesn't exist
         if (!file_exists($pythonPath)) {
-            throw new \RuntimeException("Python not found at: {$pythonPath}");
+            $alternatives = [
+                base_path('venv/Scripts/python.exe'),
+                'C:\\laragon\\www\\CVision\\venv\\Scripts\\python.exe',
+                'python',
+                'python3',
+            ];
+            foreach ($alternatives as $alt) {
+                if ($alt === 'python' || $alt === 'python3') {
+                    $pythonPath = $alt;
+                    break;
+                }
+                if (file_exists($alt)) {
+                    $pythonPath = $alt;
+                    break;
+                }
+            }
         }
 
         $script = base_path('python/extract_text.py');

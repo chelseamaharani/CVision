@@ -16,6 +16,8 @@ class AnalyzeCVResponse(BaseModel):
     skill_gap: dict[str, Any] | None = Field(default=None, description="Skill gap analysis")
     experience_years: float = Field(default=0.0, description="Estimated years of experience")
     education_level: str = Field(default="Unknown", description="Highest education level detected")
+    min_experience: float = Field(default=0.0, description="Minimum required years of experience")
+    required_education: str = Field(default="", description="Required education level")
 
 
 class HealthResponse(BaseModel):

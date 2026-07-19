@@ -86,105 +86,41 @@ $candidate = $candidate ?? [
 
 </div>
 
-{{-- ===================== SCORE + DETAILED BREAKDOWN ===================== --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+{{-- ===================== SCORE CARD ===================== --}}
+<div class="bg-white rounded-2xl shadow-sm p-6 flex flex-wrap items-center gap-8 mb-6">
 
-    {{-- Score Card (2/3 width) --}}
-    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm p-6 flex flex-wrap items-center gap-8">
-
-        {{-- Circle Score --}}
-        <div class="relative w-28 h-28 flex-shrink-0">
-            <svg class="w-28 h-28 -rotate-90" viewBox="0 0 36 36">
-                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E8EAFF" stroke-width="3"/>
-                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#38BDF8" stroke-width="3"
-                    stroke-dasharray="{{ $candidate['score'] }}, 100" stroke-linecap="round"/>
-            </svg>
-            <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-gray-800">
-                {{ $candidate['score'] }}%
-            </span>
-        </div>
-
-        {{-- Matching Score --}}
-        <div>
-            <p class="font-bold text-gray-900 text-lg mb-2">Matching Score</p>
-            <span class="inline-flex items-center gap-1.5 bg-green-100 text-green-600 text-sm font-semibold px-3 py-1 rounded-full mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/>
-                </svg>
-                #{{ $candidate['rank'] }} Highly Match
-            </span>
-            <p class="text-gray-400 text-sm">{{ $candidate['percentile'] }}</p>
-        </div>
-
-        {{-- Rank --}}
-        <div>
-            <p class="font-bold text-gray-900 text-lg mb-2">Rank</p>
-            <p class="text-2xl font-bold text-[#4B52B0] mb-1">#{{ $candidate['rank'] }}</p>
-            <p class="text-gray-400 text-sm mb-2">Status</p>
-            <span class="inline-block bg-green-100 text-green-600 text-sm font-semibold px-3 py-1 rounded-full">
-                {{ $candidate['status'] }}
-            </span>
-        </div>
-
+    {{-- Circle Score --}}
+    <div class="relative w-28 h-28 flex-shrink-0">
+        <svg class="w-28 h-28 -rotate-90" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E8EAFF" stroke-width="3"/>
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#38BDF8" stroke-width="3"
+                stroke-dasharray="{{ $candidate['score'] }}, 100" stroke-linecap="round"/>
+        </svg>
+        <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-gray-800">
+            {{ $candidate['score'] }}%
+        </span>
     </div>
 
-    {{-- Detailed Breakdown (1/3 width) --}}
-    <div class="bg-white rounded-2xl shadow-sm p-6">
-        <h3 class="font-bold text-gray-900 text-lg mb-4">Detailed Breakdown</h3>
+    {{-- Matching Score --}}
+    <div>
+        <p class="font-bold text-gray-900 text-lg mb-2">Matching Score</p>
+        <span class="inline-flex items-center gap-1.5 bg-green-100 text-green-600 text-sm font-semibold px-3 py-1 rounded-full mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/>
+            </svg>
+            #{{ $candidate['rank'] }} Highly Match
+        </span>
+        <p class="text-gray-400 text-sm">{{ $candidate['percentile'] }}</p>
+    </div>
 
-        <div class="flex flex-col divide-y divide-gray-100">
-
-            {{-- Skill Match --}}
-            <div class="py-3">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span class="font-semibold text-gray-800 text-sm">Skill Match</span>
-                    </div>
-                    <span class="bg-[#DDE0F5] text-[#4B52B0] text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0">
-                        {{ $candidate['skills_count'] }} of {{ $candidate['skills_total'] }} matched
-                    </span>
-                </div>
-                <div class="flex flex-wrap gap-1.5 mb-1">
-                    @foreach($candidate['skills_matched'] as $skill)
-                        <span class="bg-[#DDE0F5] text-[#4B52B0] text-xs font-medium px-2.5 py-0.5 rounded-full">{{ $skill }}</span>
-                    @endforeach
-                </div>
-                <p class="text-gray-400 text-xs">{{ $candidate['skill_gap'] }}</p>
-            </div>
-
-            {{-- Experience Fit --}}
-            <div class="py-3">
-                <div class="flex items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#4B52B0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
-                    <span class="font-semibold text-gray-800 text-sm">Experience</span>
-                </div>
-                <p class="text-gray-700 text-sm font-medium mb-1">
-                    {{ $candidate['experience_years'] }} years of experience
-                </p>
-                <p class="text-gray-400 text-xs">Extracted from CV</p>
-            </div>
-
-            {{-- Education Fit --}}
-            <div class="py-3">
-                <div class="flex items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#4B52B0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0112 20.055a12.083 12.083 0 01-6.16-9.477L12 14z"/>
-                    </svg>
-                    <span class="font-semibold text-gray-800 text-sm">Education</span>
-                </div>
-                <p class="text-gray-700 text-sm font-medium mb-1">
-                    {{ $candidate['education'] }}
-                </p>
-                <p class="text-gray-400 text-xs">Extracted from CV</p>
-            </div>
-
-
-        </div>
+    {{-- Rank --}}
+    <div>
+        <p class="font-bold text-gray-900 text-lg mb-2">Rank</p>
+        <p class="text-2xl font-bold text-[#4B52B0] mb-1">#{{ $candidate['rank'] }}</p>
+        <p class="text-gray-400 text-sm mb-2">Status</p>
+        <span class="inline-block bg-green-100 text-green-600 text-sm font-semibold px-3 py-1 rounded-full">
+            {{ $candidate['status'] }}
+        </span>
     </div>
 
 </div>

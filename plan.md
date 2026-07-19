@@ -1,38 +1,48 @@
 # CVision AI Integration - Fix Plan
 
-## Issues Identified
+## All Issues Identified (17 Total)
 
-### 1. Resume Format Not Neat ✅ FIXED
-- The `candidate_resume.blade.php` has formatting issues
-- Experience/Education data from parsed resume is now being used properly
-- Controller now passes parsed experience/education to view
+### Critical Issues (Phase 1)
+1. ✅ Model Gemini tidak valid (`gemini-3.1-flash-lite` → `gemini-2.0-flash-lite`)
+2. ✅ Endpoint `/api/cv/analyze` tidak menerima job requirements
+3. ✅ PDF extraction loop tidak berguna di CVExtractionService
 
-### 2. Job Input Not Being Read ✅ PARTIALLY FIXED
-- HRD inputs job requirements (experience, education) in job input
-- System now passes `min_experience` and `required_education` to AI service
-- Python backend receives these parameters (can be used for matching)
+### Major Issues (Phase 2)
+4. ✅ Duplikasi resume parsing (Python vs PHP)
+5. ✅ Field `skills_total` / `skills_count` tidak diisi
+6. ✅ Cache key tidak include job description update
+7. ✅ Rank tidak konsisten pada concurrent requests
+8. ✅ UTF-8 cleaning tidak efektif
 
-### 3. Inconsistent Ranking/Scoring ✅ FIXED
-- Removed power transformation (square root) from `calculate_match_percentage`
-- Now uses direct multiplication: `hybrid_score * 100`
-- Same CV + same job will produce consistent scores
+### Performance & UX Issues (Phase 3)
+9. ✅ Rate limiting terlalu ketat (2s → 0.5s)
+10. ✅ Tidak ada monitoring queue worker
+11. ✅ Python subprocess fallback untuk PDF extraction di Windows
+12. ✅ Tidak ada feedback real-time untuk proses screening
+13. ✅ Google Auth route tidak fungsional
+14. ✅ Tidak ada loading state untuk upload
 
 ## Changes Made
 
-### 1. Python Files
-- `python/extract_text.py` - Fixed to extract ALL pages (was only extracting page 0)
-- `python/services/similarity.py` - Removed power transformation for consistent scoring
-- `python/ai_engine.py` - Updated to use consistent scoring
-- `python/main.py` - Added `min_experience` and `required_education` parameters
+### Phase 1 - Critical Fixes
+- `python/services/gemini_client.py` - Model name updated
+- `python/models/schemas.py` - Added `min_experience` and `required_education` fields
+- `python/main.py` - Synchronized endpoint parameters
+- `app/Services/CVExtractionService.php` - Removed dead code
 
-### 2. PHP Files
-- `app/Services/CVExtractionService.php` - Fixed fallback script to extract all pages
-- `app/Services/AIService.php` - Added `minExperienceYears` and `requiredEducation` parameters
-- `app/Services/GeminiAIService.php` - Added new parameters to API call
-- `app/Services/CVScoreService.php` - Passes job requirements to AI service
-- `app/DTOs/CVScoreResult.php` - Added new fields for job requirements
-- `app/Http/Controllers/CandidateResumeController.php` - Uses parsed experience/education data
-- `resources/views/pages/candidate_resume.blade.php` - Fixed format, uses structured resume
+### Phase 2 - Data Integrity
+- `app/Services/CVScoreService.php` - Added skills_total/count calculation, improved cache key, fixed rank calculation
+- `app/DTOs/CVScoreResult.php` - Fixed UTF-8 cleaning
+
+### Phase 3 - Performance & UX
+- `python/services/gemini_client.py` - Reduced rate limit delay
+- `app/Http/Controllers/LandingPagePelamarController.php` - Added queue fallback
+- `resources/views/pages/landing_page_pelamar.blade.php` - Added loading state
+
+### Phase 4 - Code Quality
+- `python/services/resume_generator.py` - Removed duplicate parser
+- `app/Services/CVExtractionService.php` - Added Python path auto-detection
+- `routes/web.php` - Removed non-functional Google Auth route
 
 ## Testing Instructions
 
@@ -47,6 +57,9 @@ cd python
 uvicorn main:app --reload --port 8000
 ```
 
-3. Upload the same CV multiple times to the same job - scores should now be consistent
-
-4. Check the candidate resume page - experience and education should now be displayed from parsed data
+3. Upload CV and verify:
+   - Model Gemini responds correctly
+   - Job requirements are passed to AI service
+   - Skills total/count are populated
+   - Rank is calculated correctly
+   - Loading state appears during upload

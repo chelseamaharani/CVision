@@ -58,7 +58,13 @@ class LandingPagePelamarController extends Controller
                 'file_name'     => $request->file('cv_file')->getClientOriginalName(),
             ]);
 
-            ProcessCVJob::dispatch($cv);
+            // Try to dispatch to queue, fallback to synchronous if queue worker is not running
+            try {
+                ProcessCVJob::dispatch($cv);
+            } catch (\Throwable $e) {
+                Log::warning("Queue dispatch failed, processing synchronously: {$e->getMessage()}");
+                ProcessCVJob::dispatchSync($cv);
+            }
 
             Log::info("CV #{$cv->id} uploaded and queued for AI processing", [
                 'job_id' => $request->upload_job_id,

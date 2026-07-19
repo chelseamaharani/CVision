@@ -3,12 +3,18 @@ Gemini AI Client Service
 Handles communication with Google Gemini API for job recommendations.
 """
 
+import sys
 import json
 import logging
 import time
 from typing import Any
 
 from google import genai
+
+# Fix for Windows console encoding (cp1252) - enable UTF-8 output
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +26,7 @@ class GeminiClient:
     Includes retry logic with exponential backoff for rate limiting.
     """
 
-    def __init__(self, api_key: str, model: str = "gemini-3.1-flash-lite"):
+    def __init__(self, api_key: str, model: str = "gemini-2.0-flash-lite"):
         """
         Initialize the Gemini client.
 
@@ -33,7 +39,7 @@ class GeminiClient:
         self.client = genai.Client(api_key=api_key)
         self.model = model
         self._last_request_time = 0.0
-        self._min_delay = 2.0  # Minimum 2 detik antar request ke Gemini
+        self._min_delay = 0.5  # Minimum 0.5 detik antar request ke Gemini
 
     def _rate_limit(self):
         """

@@ -66,8 +66,11 @@ class CVScoreResult
     private function cleanUtf8(mixed $data): mixed
     {
         if (is_string($data)) {
-            // Remove invalid UTF-8 characters
-            return mb_convert_encoding($data, 'UTF-8', 'UTF-8');
+            // Remove invalid UTF-8 characters by re-encoding with auto-detection
+            $cleaned = mb_convert_encoding($data, 'UTF-8', 'auto');
+            // Also strip any remaining invalid byte sequences
+            $cleaned = preg_replace('/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]/u', '', $cleaned);
+            return $cleaned;
         }
 
         if (is_array($data)) {

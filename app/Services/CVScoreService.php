@@ -59,7 +59,7 @@ class CVScoreService
         }
 
         // Clean UTF-8 encoding to prevent json_encode errors
-        $cvText = mb_convert_encoding($cvText, 'UTF-8', 'UTF-8');
+        $cvText = mb_convert_encoding($cvText, 'UTF-8', 'auto');
 
         // Step 2: Analyze via AI service
         Log::info("Analyzing CV #{$cv->id} against job #{$job->id}");
@@ -71,6 +71,12 @@ class CVScoreService
             minExperienceYears: $job->min_experience ? (float) $job->min_experience : null,
             requiredEducation: $job->education_requirement ?: null,
         );
+
+        // Fallback: if Gemini returns empty recommendations, generate based on skills
+        if (empty($result->recommendation['recommendations'] ?? [])) {
+            Log::info("Gemini returned empty recommendations, using skill-based fallback");
+            $result = $this->addFallbackRecommendations($result, $job, $cvText);
+        }
 
         // Step 3: Cache the result (TTL: 1 hour)
         Cache::put($cacheKey, $result, now()->addHour());
@@ -90,22 +96,35 @@ class CVScoreService
     {
         $job = $job ?? $cv->uploadJob;
 
+        $skillsPresent = $result->skillGap['skills_present'] ?? [];
+        $skillsMissing = $result->skillGap['skills_missing'] ?? [];
+
         $data = array_merge($result->toArray(), [
             'upload_job_id'   => $job->id,
             'cv_id'           => $cv->id,
             'status'          => 'Processed',
-            'skills_matched'  => $result->skillGap['skills_present'] ?? null,
-            'skill_gap'       => $result->skillGap['skills_missing'] ?? null,
+            'skills_matched'  => $skillsPresent,
+            'skill_gap'       => $skillsMissing,
+            'skills_total'    => count($skillsPresent) + count($skillsMissing),
+            'skills_count'    => count($skillsPresent),
             'experience_years'=> $result->experienceYears,
             'education_match' => $result->educationLevel,
-            'rank'            => $this->calculateRank($job->id, $result->matchPercentage),
+            'rank'            => 0, // Will be calculated after save
         ]);
 
         // Update existing or create new
-        return MatchingResult::updateOrCreate(
+        $matchingResult = MatchingResult::updateOrCreate(
             ['cv_id' => $cv->id, 'upload_job_id' => $job->id],
             $data
         );
+
+        // Calculate rank AFTER data is saved to ensure accuracy
+        $matchingResult->rank = MatchingResult::where('upload_job_id', $job->id)
+            ->where('score', '>', $matchingResult->score)
+            ->count() + 1;
+        $matchingResult->save();
+
+        return $matchingResult;
     }
 
     /**
@@ -115,18 +134,66 @@ class CVScoreService
     private function buildCacheKey(Cv $cv, UploadJob $job): string
     {
         $fileTimestamp = $cv->updated_at?->timestamp ?? $cv->created_at?->timestamp ?? time();
-        return "cv_analysis:{$cv->id}:job_{$job->id}:{$fileTimestamp}";
+        $jobTimestamp = $job->updated_at?->timestamp ?? $job->created_at?->timestamp ?? time();
+        return "cv_analysis:{$cv->id}:job_{$job->id}:{$fileTimestamp}:{$jobTimestamp}";
     }
 
     /**
-     * Calculate the rank of this score among all results for the same job.
+     * Add fallback recommendations based on skills if Gemini returns empty.
      */
-    private function calculateRank(int $jobId, float $score): int
+    private function addFallbackRecommendations(CVScoreResult $result, UploadJob $job, string $cvText): CVScoreResult
     {
-        $higherScores = MatchingResult::where('upload_job_id', $jobId)
-            ->where('score', '>', $score)
-            ->count();
-
-        return $higherScores + 1;
+        $requiredSkills = $job->skills_array;
+        $matchedSkills = $result->skillGap['skills_present'] ?? [];
+        
+        // Generate simple recommendations based on matched skills
+        $recommendations = [];
+        
+        if (!empty($matchedSkills)) {
+            $recommendations[] = [
+                'job_title' => $job->title . ' (Match)',
+                'confidence' => round($result->matchPercentage),
+                'reasoning' => 'Based on skill matching: ' . implode(', ', array_slice($matchedSkills, 0, 3)),
+                'supporting_skills' => array_slice($matchedSkills, 0, 5),
+            ];
+        }
+        
+        // Add generic recommendations based on experience
+        $experienceYears = $result->experienceYears;
+        if ($experienceYears > 0) {
+            $recommendations[] = [
+                'job_title' => 'Related Positions',
+                'confidence' => max(50, round($result->matchPercentage)),
+                'reasoning' => "Based on {$experienceYears} years of experience",
+                'supporting_skills' => $matchedSkills,
+            ];
+        }
+        
+        // If still empty, add at least one generic recommendation
+        if (empty($recommendations)) {
+            $recommendations[] = [
+                'job_title' => 'General Positions',
+                'confidence' => 50,
+                'reasoning' => 'Based on CV content analysis',
+                'supporting_skills' => [],
+            ];
+        }
+        
+        // Create new result with fallback recommendations
+        $newResult = new CVScoreResult(
+            tfidfScore: $result->tfidfScore,
+            sbertScore: $result->sbertScore,
+            hybridScore: $result->hybridScore,
+            matchPercentage: $result->matchPercentage,
+            recommendation: ['recommendations' => $recommendations],
+            skillGap: $result->skillGap,
+            experienceYears: $result->experienceYears,
+            educationLevel: $result->educationLevel,
+            minExperienceYears: $result->minExperienceYears,
+            requiredEducation: $result->requiredEducation,
+        );
+        
+        return $newResult;
     }
+
 }

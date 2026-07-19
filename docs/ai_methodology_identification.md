@@ -99,8 +99,8 @@ Gemini adalah Large Language Model (LLM) dari Google yang digunakan untuk tugas-
 2. **Skill Gap Analysis**: Menganalisis kekurangan skill antara CV kandidat dan requirement job, menghasilkan fit_score (0-100) dan rekomendasi HIRE / CONSIDER / REJECT.
 
 **Detail Teknis:**
-- Model: `gemini-3.1-flash-lite`
-- Rate limiting: minimum 2 detik antar request (menghindari quota limit)
+- Model: `gemini-2.0-flash-lite`
+- Rate limiting: minimum 0.5 detik antar request (menghindari quota limit)
 - Retry logic: exponential backoff hingga 3x percobaan
 - Output: di-parse sebagai JSON terstruktur
 
