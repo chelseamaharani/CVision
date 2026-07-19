@@ -38,15 +38,40 @@ from services.resume_generator import ResumeGenerator
 from models.schemas import AnalyzeCVResponse, HealthResponse, ResumeResponse, ResumeDownloadResponse
 
 # ---------------------------------------------------------------------------
+# Logging Configuration (must be before any logger usage)
+# ---------------------------------------------------------------------------
+
+if sys.platform == 'win32':
+    logging.root.handlers = []
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ))
+    logging.root.setLevel(logging.INFO)
+    logging.root.addHandler(console_handler)
+
+logger = logging.getLogger("cvision.ai")
+
+# ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(ROOT_DIR / ".env")
+
+# Load .env file if exists (for local dev), ignore if not (Railway uses env vars)
+dotenv_path = ROOT_DIR / ".env"
+if dotenv_path.exists():
+    load_dotenv(dotenv_path, override=False)
+    logger.info(f"Loaded environment from {dotenv_path}")
+else:
+    logger.info("No .env file found — using Railway environment variables")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY and os.getenv("APP_ENV") != "production":
+    raise ValueError("GEMINI_API_KEY not found in environment")
 if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY not found in .env")
+    logger.warning("GEMINI_API_KEY is not set — some features may not work")
 
 # ---------------------------------------------------------------------------
 # Global service instances (loaded once at startup)
@@ -55,24 +80,6 @@ if not GEMINI_API_KEY:
 similarity_service: SimilarityService | None = None
 gemini_client: GeminiClient | None = None
 resume_generator: ResumeGenerator | None = None
-
-# Configure logging with UTF-8 encoding for Windows
-if sys.platform == 'win32':
-    # Remove default handlers
-    logging.root.handlers = []
-    
-    # Create UTF-8 console handler
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    ))
-    
-    # Configure root logger
-    logging.root.setLevel(logging.INFO)
-    logging.root.addHandler(console_handler)
-
-logger = logging.getLogger("cvision.ai")
 
 
 @asynccontextmanager
@@ -110,10 +117,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS — allow Laravel dev server
+# CORS — allow Laravel dev server & production domain
+LARAVEL_URL = os.getenv("LARAVEL_URL", "http://localhost:8000")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict to your Laravel domain
+    allow_origins=[
+        LARAVEL_URL,
+        "http://localhost:8000",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

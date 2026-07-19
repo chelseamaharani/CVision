@@ -1,0 +1,68 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Dependencies
+node_modules/
+vendor/
+composer.lock
+package-lock.json
+
+# Environment
+.env
+.env.backup
+.env.production
+.env.example
+
+# Cache & logs
+storage/framework/cache/*
+storage/framework/views/*
+storage/framework/sessions/*
+storage/logs/*
+!storage/framework/.gitkeep
+!storage/logs/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Database
+*.sqlite
+*.db
+
+# Tests
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# Docs
+docs/
+*.md
+README.md
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build artifacts
+public/build/*
+!public/build/.gitkeep
+public/hot
