@@ -3,7 +3,7 @@ CVision AI Engine — FastAPI Server
 Provides REST API endpoints for CV analysis, similarity scoring, and Gemini recommendations.
 
 Run with:
-    uvicorn main:app --reload --port 8000
+    uvicorn main:app --reload --port 8080
 """
 
 import os
@@ -409,4 +409,4 @@ async def analyze_cv_text(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
