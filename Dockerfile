@@ -60,15 +60,15 @@ RUN php artisan config:cache \
     && php artisan view:cache \
     && php artisan event:cache 2>/dev/null || true
 
-# Set permissions
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache \
-    && chmod -R 775 /app/storage /app/bootstrap/cache
-
-# Copy Nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
 # Create storage link
 RUN php artisan storage:link || true
+
+# Copy Nginx configuration (after nginx is installed, use correct path)
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Set permissions
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache \
+    && chmod -R 775 /app/storage /app/bootstrap/cache || true
 
 EXPOSE 80
 
