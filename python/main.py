@@ -73,6 +73,9 @@ if not GEMINI_API_KEY and os.getenv("APP_ENV") != "production":
 if not GEMINI_API_KEY:
     logger.warning("GEMINI_API_KEY is not set — some features may not work")
 
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-lite")
+logger.info(f"Using Gemini model: {GEMINI_MODEL}")
+
 # ---------------------------------------------------------------------------
 # Global service instances (loaded once at startup)
 # ---------------------------------------------------------------------------
@@ -93,7 +96,7 @@ async def lifespan(app: FastAPI):
     logger.info("SBERT model loaded successfully.")
 
     logger.info("Initializing Gemini client...")
-    gemini_client = GeminiClient(api_key=GEMINI_API_KEY)
+    gemini_client = GeminiClient(api_key=GEMINI_API_KEY, model=GEMINI_MODEL)
     logger.info("Gemini client initialized.")
 
     logger.info("Initializing Resume Generator...")
