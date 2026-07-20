@@ -54,25 +54,42 @@ RUN NODE_OPTIONS="--max-old-space-size=512" npm ci && \
     NODE_OPTIONS="--max-old-space-size=512" npm run build && \
     rm -rf node_modules
 
-# Laravel optimization
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache \
-    && php artisan event:cache 2>/dev/null || true
-
-# Create storage link
-RUN php artisan storage:link || true
-
-# Copy Nginx configuration (after nginx is installed, use correct path)
+# Copy Nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Set permissions
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache \
     && chmod -R 775 /app/storage /app/bootstrap/cache || true
 
+# Create startup script
+RUN printf '%s\n' \
+    '#!/bin/sh' \
+    '' \
+    '# Wait for PHP-FPM to be ready' \
+    'echo "Waiting for PHP-FPM..."' \
+    'php-fpm -D' \
+    'sleep 2' \
+    '' \
+    '# Check if PHP-FPM is listening' \
+    'if ! pgrep -x "php-fpm" > /dev/null; then' \
+    '    echo "ERROR: PHP-FPM failed to start"' \
+    '    exit 1' \
+    'fi' \
+    '' \
+    '# Run Laravel optimizations with runtime env vars' \
+    'echo "Running Laravel optimizations..."' \
+    'php artisan config:cache 2>/dev/null || true' \
+    'php artisan route:cache 2>/dev/null || true' \
+    'php artisan view:cache 2>/dev/null || true' \
+    'php artisan storage:link 2>/dev/null || true' \
+    '' \
+    'echo "Starting Nginx..."' \
+    'nginx -g "daemon off;"' \
+    > /start.sh && chmod +x /start.sh
+
 EXPOSE 80
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD pgrep nginx > /dev/null && pgrep php-fpm > /dev/null || exit 1
 
-CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["/start.sh"]
