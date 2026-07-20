@@ -65,15 +65,22 @@ RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache \
 RUN printf '%s\n' \
     '#!/bin/sh' \
     '' \
-    '# Wait for PHP-FPM to be ready' \
-    'echo "Waiting for PHP-FPM..."' \
+    '# Start PHP-FPM in background' \
+    'echo "Starting PHP-FPM..."' \
     'php-fpm -D' \
-    'sleep 2' \
     '' \
-    '# Check if PHP-FPM is listening' \
-    'if ! pgrep -x "php-fpm" > /dev/null; then' \
-    '    echo "ERROR: PHP-FPM failed to start"' \
-    '    exit 1' \
+    '# Wait for PHP-FPM to be ready (check port 9000)' \
+    'echo "Waiting for PHP-FPM to listen on port 9000..."' \
+    'for i in $(seq 1 10); do' \
+    '    if nc -z 127.0.0.1 9000 2>/dev/null; then' \
+    '        echo "PHP-FPM is ready."' \
+    '        break' \
+    '    fi' \
+    '    sleep 1' \
+    'done' \
+    '' \
+    'if ! nc -z 127.0.0.1 9000 2>/dev/null; then' \
+    '    echo "WARNING: PHP-FPM may not be ready yet, continuing anyway..."' \
     'fi' \
     '' \
     '# Run Laravel optimizations with runtime env vars' \
