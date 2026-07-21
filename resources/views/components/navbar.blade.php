@@ -23,7 +23,7 @@
 
         <a href="{{ route('register') }}"
            class="bg-white text-[#4B52B0] font-semibold text-sm px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-            Daftar Akun
+            Register an Account
         </a>
 
         <a href="{{ route('login') }}"

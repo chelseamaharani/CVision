@@ -106,15 +106,11 @@ class JobListingController extends Controller
 
         foreach ($cvs as $index => $cv) {
             try {
-                // Proses CV via AI Engine satu per satu dengan jeda
-                // agar tidak membanjiri API Gemini (rate limiting)
                 Log::info("Screening CV {$index}/{$totalCvs}: CV #{$cv->id}");
 
                 ProcessCVJob::dispatchSync($cv);
                 $processed++;
 
-                // JEDA antar CV: 5 detik untuk memberi waktu Gemini API pulih
-                // Kecuali untuk CV terakhir, tidak perlu jeda
                 if ($index < $totalCvs - 1) {
                     Log::info("Waiting 5 seconds before processing next CV...");
                     sleep(5);
@@ -126,7 +122,6 @@ class JobListingController extends Controller
             }
         }
 
-        // Hitung ulang rank berdasarkan score tertinggi
         $results = $job->matchingResults()->get();
         $rankScores = $results->pluck('score', 'id')->toArray();
         arsort($rankScores);
@@ -149,6 +144,33 @@ class JobListingController extends Controller
                 'failed'    => $failed,
                 'total'     => $cvs->count(),
             ],
+        ]);
+    }
+
+    /**
+     * Hapus job beserta CV & hasil matching yang terkait
+     * Dipanggil dari modal "Delete" di halaman Job Listing
+     */
+    public function destroy($jobId)
+    {
+        $job = UploadJob::find($jobId);
+
+        if (!$job) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Job not found.',
+            ], 404);
+        }
+
+        $title = $job->title;
+
+        $job->matchingResults()->delete();
+        $job->cvs()->delete();
+        $job->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "\"{$title}\" has been deleted successfully.",
         ]);
     }
 }

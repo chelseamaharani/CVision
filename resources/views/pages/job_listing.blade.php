@@ -60,7 +60,7 @@
 
         @foreach($jobsList as $index => $job)
         <div class="job-row grid grid-cols-12 px-6 py-5 border-b border-gray-100 items-center hover:bg-gray-50 transition-colors"
-             data-title="{{ strtolower($job['title']) }}">
+             data-title="{{ strtolower($job['title']) }}" data-job-id="{{ $job['id'] }}">
 
             <div class="col-span-1">
                 <span class="text-lg font-bold text-gray-800">{{ $index + 1 }}.</span>
@@ -74,7 +74,7 @@
                 <span class="text-gray-700 text-sm">{{ $job['applicants'] }}</span>
             </div>
 
-            <div class="col-span-3">
+            <div class="col-span-3 flex items-center gap-2">
                 <a href="{{ route('screening.index', ['jobId' => $job['id']]) }}"
                    class="flex items-center gap-2 border-2 border-[#2D3799] text-[#2D3799] font-semibold text-sm px-4 py-2 rounded-lg hover:bg-[#2D3799] hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,6 +82,14 @@
                     </svg>
                     Screen CVs
                 </a>
+
+                <button type="button"
+                        onclick="openDeleteModal('{{ $job['title'] }}', {{ $job['id'] }})"
+                        class="flex items-center justify-center border-2 border-red-500 text-red-500 font-semibold text-sm px-3 py-2 rounded-lg hover:bg-red-500 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16"/>
+                    </svg>
+                </button>
             </div>
 
         </div>
@@ -170,11 +178,67 @@
     </div>
 </div>
 
+{{-- ===================== MODAL 4: CONFIRM DELETE ===================== --}}
+<div id="deleteModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-8 text-center">
+
+        <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16"/>
+            </svg>
+        </div>
+
+        <h3 class="font-bold text-gray-900 text-lg mb-1">Delete Job?</h3>
+        <p id="deleteJobTitle" class="text-gray-500 text-sm mb-6">Frontend Developer</p>
+
+        <div class="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-3 mb-6">
+            This action cannot be undone. All CVs linked to this job will also be removed.
+        </div>
+
+        <div class="flex gap-3">
+            <button type="button" onclick="closeAllModals()"
+                    class="flex-1 border-2 border-gray-200 text-gray-600 font-semibold text-sm py-3 rounded-xl hover:bg-gray-50 transition-colors">
+                Cancel
+            </button>
+            <button type="button" onclick="confirmDelete()"
+                    class="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold text-sm py-3 rounded-xl transition-colors">
+                Delete
+            </button>
+        </div>
+
+    </div>
+</div>
+
+{{-- ===================== MODAL 5: DELETE SUCCESS ===================== --}}
+<div id="deleteSuccessModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-8 text-center">
+
+        <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Job Deleted!</h3>
+        <p id="deleteSuccessDescription" class="text-gray-500 text-sm mb-6 leading-relaxed">
+            The job has been successfully removed.
+        </p>
+
+        <button type="button" onclick="closeAllModals()"
+                class="w-full bg-[#2D3799] hover:bg-[#232d85] text-white font-semibold text-sm py-3 rounded-xl transition-colors">
+            Close
+        </button>
+
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
     let currentJobId = null;
+    let deleteJobId = null;
+    const deleteBaseUrl = "{{ url('/job_listing') }}";
 
     // ===== Open Modal 1: Confirm =====
     function openScreeningModal(title, count, jobId) {
@@ -191,6 +255,8 @@
         document.getElementById('confirmModal').classList.add('hidden');
         document.getElementById('loadingModal').classList.add('hidden');
         document.getElementById('successModal').classList.add('hidden');
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('deleteSuccessModal').classList.add('hidden');
     }
 
     // ===== Start screening: Modal 1 -> Modal 2 -> Modal 3 =====
@@ -229,6 +295,43 @@
         }
     });
 
+    // ===== Open Delete Confirm Modal =====
+    function openDeleteModal(title, jobId) {
+        deleteJobId = jobId;
+        document.getElementById('deleteJobTitle').textContent = title;
+        document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    // ===== Confirm & Execute Delete =====
+    function confirmDelete() {
+        fetch(`${deleteBaseUrl}/${deleteJobId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                    || '{{ csrf_token() }}',
+            },
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('deleteModal').classList.add('hidden');
+
+                if (data.success) {
+                    const row = document.querySelector(`.job-row[data-job-id="${deleteJobId}"]`);
+                    if (row) row.remove();
+
+                    document.getElementById('deleteSuccessDescription').textContent = data.message;
+                    document.getElementById('deleteSuccessModal').classList.remove('hidden');
+                } else {
+                    alert(data.message || 'Failed to delete job. Please try again.');
+                }
+            })
+            .catch(() => {
+                document.getElementById('deleteModal').classList.add('hidden');
+                alert('Something went wrong. Please try again.');
+            });
+    }
+
     // ===== Search filter =====
     document.getElementById('searchJobInput').addEventListener('input', function() {
         const keyword = this.value.toLowerCase().trim();
@@ -249,7 +352,7 @@
     });
 
     // Close modal kalau klik area gelap di luar
-    ['confirmModal', 'successModal'].forEach(function(id) {
+    ['confirmModal', 'successModal', 'deleteModal', 'deleteSuccessModal'].forEach(function(id) {
         document.getElementById(id).addEventListener('click', function(e) {
             if (e.target === this) closeAllModals();
         });

@@ -4,7 +4,7 @@
 
 @section('content')
 
-<section class="bg-[#E8EAFF] px-8 py-12 md:py-16">
+<section class="bg-[#F4F5FC] px-8 py-12 md:py-16">
     <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-start">
 
         {{-- ===================== LEFT: GREETING + INFO ===================== --}}
@@ -16,7 +16,7 @@
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-1">
                 Ready to work?
             </h1>
-            <h2 class="text-3xl md:text-4xl font-bold text-[#4B52B0] leading-tight mb-5">
+            <h2 class="text-3xl md:text-4xl font-bold text-[#3730A3] leading-tight mb-5">
                 Upload your CV here!
             </h2>
 
@@ -29,39 +29,39 @@
             <div class="grid grid-cols-3 gap-4 mb-8">
 
                 <div>
-                    <div class="w-14 h-14 rounded-full bg-[#DDE0F5] flex items-center justify-center mb-3">
+                    <div class="w-14 h-14 rounded-full bg-[#CECBF6] flex items-center justify-center mb-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                     </div>
-                    <p class="text-[#4B52B0] font-semibold text-sm mb-1">PDF/DOCX Format</p>
+                    <p class="text-[#3730A3] font-semibold text-sm mb-1">PDF/DOCX Format</p>
                     <p class="text-gray-500 text-xs leading-relaxed">PDF or DOC/DOCX files only</p>
                 </div>
 
                 <div>
-                    <div class="w-14 h-14 rounded-full bg-[#DDE0F5] flex items-center justify-center mb-3">
+                    <div class="w-14 h-14 rounded-full bg-[#CECBF6] flex items-center justify-center mb-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
                     </div>
-                    <p class="text-[#4B52B0] font-semibold text-sm mb-1">Safe & Trusted</p>
+                    <p class="text-[#3730A3] font-semibold text-sm mb-1">Safe & Trusted</p>
                     <p class="text-gray-500 text-xs leading-relaxed">Your CV data is safe and protected</p>
                 </div>
 
                 <div>
-                    <div class="w-14 h-14 rounded-full bg-[#DDE0F5] flex items-center justify-center mb-3">
+                    <div class="w-14 h-14 rounded-full bg-[#CECBF6] flex items-center justify-center mb-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
                     </div>
-                    <p class="text-[#4B52B0] font-semibold text-sm mb-1">Fast Process</p>
+                    <p class="text-[#3730A3] font-semibold text-sm mb-1">Fast Process</p>
                     <p class="text-gray-500 text-xs leading-relaxed">Get recommendations in no time</p>
                 </div>
 
             </div>
 
             {{-- Tips Box --}}
-            <div class="bg-[#7B82C9] text-white rounded-xl px-6 py-4 max-w-md">
+            <div class="bg-[#3730A3] text-white rounded-xl px-6 py-4 max-w-md">
                 <p class="text-sm font-medium leading-relaxed">
                     <span class="font-bold">Tip:</span> Make sure your CV is up to date and informative to increase your chances!
                 </p>
@@ -74,7 +74,7 @@
             {{-- Tabs --}}
             <div class="flex border-b border-gray-200 mb-6">
                 <button type="button" onclick="switchTab('upload')" id="tabUploadBtn"
-                        class="flex-1 text-center pb-3 font-semibold text-sm text-[#4B52B0] border-b-2 border-[#4B52B0] transition-colors">
+                        class="flex-1 text-center pb-3 font-semibold text-sm text-[#3730A3] border-b-2 border-[#3730A3] transition-colors">
                     Upload CV
                 </button>
                 <button type="button" onclick="switchTab('history')" id="tabHistoryBtn"
@@ -110,7 +110,7 @@
                         <label class="block font-semibold text-gray-800 mb-2 text-sm">Position Applied</label>
                         <div class="relative">
                             <select name="upload_job_id"
-                                    class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-[#4B52B0]/30 transition cursor-pointer">
+                                    class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-[#3730A3]/30 transition cursor-pointer">
                                 <option value="" disabled selected>Select the position you're applying for</option>
                                 @forelse($jobs ?? [] as $job)
                                     <option value="{{ $job->id }}" {{ old('upload_job_id') == $job->id ? 'selected' : '' }}>
@@ -137,12 +137,12 @@
 
                         {{-- Dropzone (before file selected) --}}
                         <label for="cvFileInput" id="dropzone"
-                               class="cursor-pointer flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-300 rounded-xl py-10 px-4 hover:border-[#4B52B0] hover:bg-[#F5F6FF] transition-colors">
+                               class="cursor-pointer flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-300 rounded-xl py-10 px-4 hover:border-[#3730A3] hover:bg-[#F5F6FF] transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                             </svg>
                             <p class="text-sm text-gray-700 mb-1">
-                                Drag and drop your <span class="text-[#4B52B0] font-semibold">CV file</span> here
+                                Drag and drop your <span class="text-[#3730A3] font-semibold">CV file</span> here
                                 <br>or click to browse
                             </p>
                             <p class="text-xs text-gray-400 mt-2">Supported formats: PDF, DOC, DOCX</p>
@@ -176,7 +176,7 @@
                     {{-- Submit --}}
                     @guest
                         <a href="{{ route('login') }}"
-                           class="w-full bg-[#3B44A9] hover:bg-[#2F3890] text-white font-semibold text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                           class="w-full bg-[#3730A3] hover:bg-[#1E1B4B] text-white font-semibold text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
@@ -184,7 +184,7 @@
                         </a>
                     @else
                         <button type="submit" id="submitBtn"
-                                class="w-full bg-[#3B44A9] hover:bg-[#2F3890] text-white font-semibold text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                                class="w-full bg-[#3730A3] hover:bg-[#1E1B4B] text-white font-semibold text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
                             <span id="submitBtnText">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -214,7 +214,7 @@
                         </svg>
                         <p class="text-gray-500 text-sm mb-4">Log in to view your CV history.</p>
                         <a href="{{ route('login') }}"
-                           class="inline-flex items-center gap-2 bg-[#3B44A9] hover:bg-[#2F3890] text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition-colors">
+                           class="inline-flex items-center gap-2 bg-[#3730A3] hover:bg-[#1E1B4B] text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition-colors">
                             Login Now
                         </a>
                     </div>
@@ -226,7 +226,7 @@
                         <p class="text-gray-400 text-xs mt-0.5">Manage the CVs you've previously uploaded here.</p>
                     </div>
                     <button type="button" onclick="switchTab('upload')"
-                            class="flex items-center gap-1.5 bg-[#3B44A9] hover:bg-[#2F3890] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors flex-shrink-0">
+                            class="flex items-center gap-1.5 bg-[#3730A3] hover:bg-[#1E1B4B] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -264,7 +264,7 @@
                             {{-- Actions --}}
                             <div class="flex items-center gap-2 flex-shrink-0">
                                 <a href="{{ asset('storage/' . $cv->file_path) }}" target="_blank"
-                                   class="flex items-center gap-1 text-[#4B52B0] text-xs font-semibold hover:underline">
+                                   class="flex items-center gap-1 text-[#3730A3] text-xs font-semibold hover:underline">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -272,7 +272,7 @@
                                     View
                                 </a>
                                 <button type="button" onclick="toggleRec('rec-{{ $cv->id }}')"
-                                   class="flex items-center gap-1 text-[#4B52B0] text-xs font-semibold hover:underline">
+                                   class="flex items-center gap-1 text-[#3730A3] text-xs font-semibold hover:underline">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                     </svg>
@@ -364,16 +364,16 @@
         if (tab === 'upload') {
             uploadTab.classList.remove('hidden');
             historyTab.classList.add('hidden');
-            uploadBtn.classList.add('text-[#4B52B0]', 'border-[#4B52B0]');
+            uploadBtn.classList.add('text-[#3730A3]', 'border-[#3730A3]');
             uploadBtn.classList.remove('text-gray-400', 'border-transparent');
-            historyBtn.classList.remove('text-[#4B52B0]', 'border-[#4B52B0]');
+            historyBtn.classList.remove('text-[#3730A3]', 'border-[#3730A3]');
             historyBtn.classList.add('text-gray-400', 'border-transparent');
         } else {
             historyTab.classList.remove('hidden');
             uploadTab.classList.add('hidden');
-            historyBtn.classList.add('text-[#4B52B0]', 'border-[#4B52B0]');
+            historyBtn.classList.add('text-[#3730A3]', 'border-[#3730A3]');
             historyBtn.classList.remove('text-gray-400', 'border-transparent');
-            uploadBtn.classList.remove('text-[#4B52B0]', 'border-[#4B52B0]');
+            uploadBtn.classList.remove('text-[#3730A3]', 'border-[#3730A3]');
             uploadBtn.classList.add('text-gray-400', 'border-transparent');
         }
     }
@@ -438,16 +438,16 @@
     // Drag & drop support
     dropzone.addEventListener('dragover', function(e) {
         e.preventDefault();
-        this.classList.add('border-[#4B52B0]', 'bg-[#F5F6FF]');
+        this.classList.add('border-[#3730A3]', 'bg-[#F5F6FF]');
     });
 
     dropzone.addEventListener('dragleave', function(e) {
-        this.classList.remove('border-[#4B52B0]', 'bg-[#F5F6FF]');
+        this.classList.remove('border-[#3730A3]', 'bg-[#F5F6FF]');
     });
 
     dropzone.addEventListener('drop', function(e) {
         e.preventDefault();
-        this.classList.remove('border-[#4B52B0]', 'bg-[#F5F6FF]');
+        this.classList.remove('border-[#3730A3]', 'bg-[#F5F6FF]');
         const file = e.dataTransfer.files[0];
         if (file) {
             cvFileInput.files = e.dataTransfer.files;

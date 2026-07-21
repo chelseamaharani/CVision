@@ -1,4 +1,4 @@
-<nav class="bg-[#9AA0D8] px-6 py-4 flex items-center justify-between shadow-sm relative">
+<nav class="bg-[#3730A3] px-6 py-4 flex items-center justify-between shadow-sm relative">
 
     {{-- Kiri: Logo + Nama Aplikasi --}}
     <div class="flex items-center gap-3">
@@ -8,7 +8,7 @@
                  <img src="{{ asset('images/logo.png') }}" class="w-full h-full object-cover"> --}}
         </div>
 
-        <span class="text-gray-800 font-semibold text-lg">
+        <span class="text-white font-semibold text-lg">
             CVision
         </span>
     </div>
@@ -29,14 +29,14 @@
             </a>
         @else
             {{-- Sudah login: nama + avatar dropdown --}}
-            <span class="text-gray-800 font-medium text-sm hidden sm:block">
+            <span class="text-white font-medium text-sm hidden sm:block">
                 Hi, {{ auth()->user()->name }}
             </span>
 
             <div class="relative" id="profileDropdownWrapper">
                 {{-- Avatar trigger --}}
                 <button type="button" onclick="toggleProfileDropdown()"
-                        class="w-9 h-9 bg-[#3B44A9] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 hover:opacity-90 transition-opacity">
+                        class="w-9 h-9 bg-[#3730A3] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 hover:opacity-90 transition-opacity">
                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                 </button>
 

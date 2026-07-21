@@ -11,6 +11,7 @@ use App\Http\Controllers\CandidatesController;
 use App\Http\Controllers\CandidateResumeController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ScreeningController;
+use App\Http\Controllers\GoogleController;
 
 // ===== AUTH =====
 Route::get('/login',    [LoginController::class, 'index'])->name('login');
@@ -19,6 +20,9 @@ Route::post('/logout',  [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/register', [RegisterController::class, 'index'])->name('register');
 Route::post('/register',[RegisterController::class, 'register']);
+
+Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
 
 Route::get('/forgot-password', fn() => redirect('/login'))->name('password.request');
 
@@ -41,6 +45,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/job_listing',        [JobListingController::class, 'store'])->name('job_listing.store');
     Route::get('/job_listing',         [JobListingController::class, 'index'])->name('job_listing.index');
     Route::post('/job_listing/{jobId}/screen', [JobListingController::class, 'screen'])->name('job_listing.screen');
+    Route::delete('/job_listing/{jobId}', [JobListingController::class, 'destroy'])->name('job_listing.destroy');
 
     // Matching (History + Results detail + Candidate detail)
     Route::get('/matching',          [MatchingController::class, 'index'])->name('matching.index');
