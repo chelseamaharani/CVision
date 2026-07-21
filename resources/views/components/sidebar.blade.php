@@ -1,4 +1,4 @@
-<aside class="w-56 bg-[#6B74C8] flex flex-col py-6 px-3 flex-shrink-0 shadow-lg">
+<aside class="w-56 bg-[#3730A3] flex flex-col py-6 px-3 flex-shrink-0 shadow-lg h-screen sticky top-0 overflow-y-auto">
 
     {{-- Nav Menu --}}
     <nav class="flex flex-col gap-1 flex-1">

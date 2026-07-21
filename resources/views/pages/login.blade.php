@@ -108,7 +108,7 @@
     <div id="hrdLoginCard" class="hidden bg-white rounded-3xl shadow-xl w-full max-w-md px-10 py-10">
 
         <h2 class="text-2xl font-bold text-gray-900 mb-6">
-            HRD <span class="text-[#5C63B8]">Login</span>
+            HRD <span class="text-[#3730A3]">Login</span>
         </h2>
 
         @if($errors->any() && old('hrd_login'))
@@ -125,7 +125,7 @@
             {{-- Email --}}
             <div class="mb-4">
                 <div class="flex items-center bg-[#DEE0F5]/40 rounded-full overflow-hidden">
-                    <div class="w-11 h-11 bg-[#5C63B8] rounded-full flex items-center justify-center ml-1 flex-shrink-0">
+                    <div class="w-11 h-11 bg-[#3730A3] rounded-full flex items-center justify-center ml-1 flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
@@ -139,7 +139,7 @@
             {{-- Password --}}
             <div class="mb-6">
                 <div class="flex items-center bg-[#DEE0F5]/40 rounded-full overflow-hidden">
-                    <div class="w-11 h-11 bg-[#5C63B8] rounded-full flex items-center justify-center ml-1 flex-shrink-0">
+                    <div class="w-11 h-11 bg-[#3730A3] rounded-full flex items-center justify-center ml-1 flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                         </svg>
@@ -152,7 +152,7 @@
 
             {{-- Login Button --}}
             <button type="submit"
-                    class="w-full bg-[#DEE0F5]/60 hover:bg-[#5C63B8] hover:text-white text-gray-700 font-semibold py-3.5 rounded-full transition-all duration-200 text-sm mb-5">
+                    class="w-full bg-[#DEE0F5]/60 hover:bg-[#3730A3] hover:text-white text-gray-700 font-semibold py-3.5 rounded-full transition-all duration-200 text-sm mb-5">
                 Login
             </button>
 
@@ -161,7 +161,7 @@
         {{-- Toggle back to Pelamar form --}}
         <p class="text-center text-sm">
             <button type="button" onclick="showPelamarLogin()"
-                    class="text-[#5C63B8] font-medium hover:text-[#454B8C] hover:underline transition-colors bg-transparent border-0 cursor-pointer">
+                    class="text-[#3730A3] font-medium hover:text-[#454B8C] hover:underline transition-colors bg-transparent border-0 cursor-pointer">
                 Back to Pelamar Login
             </button>
         </p>

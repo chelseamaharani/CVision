@@ -11,27 +11,29 @@
 </head>
 <body class="bg-gray-100 antialiased">
 
-<div class="flex h-screen overflow-hidden">
+<div class="min-h-screen">
+    <div class="flex">
 
-    {{-- Sidebar --}}
-    @include('components.sidebar')
+        {{-- Sidebar --}}
+        @include('components.sidebar')
 
-    {{-- Main Area --}}
-    <div class="flex-1 flex flex-col overflow-hidden">
+        {{-- Main Area --}}
+        <div class="flex-1 flex flex-col">
 
-        {{-- Top Navbar --}}
-        @include('components.topbar')
+            {{-- Top Navbar --}}
+            @include('components.topbar')
 
-        {{-- Page Content --}}
-        <main class="flex-1 overflow-y-auto p-6 bg-gray-100">
-            @yield('content')
-        </main>
+            {{-- Scrollable Content --}}
+            <main class="flex-1 p-6 bg-gray-100">
+                @yield('content')
+            </main>
 
+        </div>
     </div>
-</div>
 
-{{-- Footer --}}
-@include('components.footer_dashboard')
+    {{-- Footer di bawah sidebar dan konten --}}
+    @include('components.footer_dashboard')
+</div>
 
 @stack('scripts')
 </body>

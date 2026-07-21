@@ -1,4 +1,4 @@
-<nav class="bg-[#5C63B8] px-6 py-4 flex items-center justify-between shadow-md">
+<nav class="bg-[#3730A3] px-6 py-4 flex items-center justify-between shadow-md">
 
     {{-- Left: Logo + Name --}}
     <div class="flex items-center gap-3">
@@ -22,7 +22,7 @@
     <div class="flex items-center gap-3">
 
         <a href="{{ route('register') }}"
-           class="bg-white text-[#4B52B0] font-semibold text-sm px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+           class="bg-white text-[#3730A3] font-semibold text-sm px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors">
             Register an Account
         </a>
 
