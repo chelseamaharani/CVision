@@ -47,7 +47,7 @@ RUN composer install \
     --no-dev \
     --optimize-autoloader \
     --no-interaction \
-    --no-scripts \
+    && php artisan package:discover \
     && composer dump-autoload --optimize
 
 # Install & build frontend assets
@@ -90,6 +90,10 @@ RUN printf '%s\n' \
     'php artisan route:cache 2>/dev/null || true' \
     'php artisan view:cache 2>/dev/null || true' \
     'php artisan storage:link 2>/dev/null || true' \
+    '' \
+    '# Run database migrations for production' \
+    'echo "Running database migrations..."' \
+    'php artisan migrate --force 2>/dev/null || true' \
     '' \
     'echo "Starting Nginx..."' \
     'nginx -g "daemon off;"' \

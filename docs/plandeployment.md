@@ -23,7 +23,7 @@ Dokumentasi perubahan yang telah dilakukan:
 |---|---|
 | **`python/main.py`** | 3 perubahan penting: |
 | | 1. **Logging dipindah ke atas** — agar `logger` siap sebelum dipakai di blok env loading |
-| | 2. **CORS production** — ganti dari `allow_origins=["*"]` menjadi `[LARAVEL_URL, localhost:8000, localhost:3000]` via env `LARAVEL_URL` |
+| | 2. **CORS production** — ganti dari `allow_origins=["*"]` menjadi `[LARAVEL_URL, localhost:8080, localhost:3000]` via env `LARAVEL_URL` |
 | | 3. **Env loading graceful** — `load_dotenv` hanya jalan jika file `.env` ada, tidak raise error di Railway. GEMINI_API_KEY warning jika tidak ada di production |
 
 ## 🔑 APP_KEY Tergenerate
@@ -50,6 +50,156 @@ base64:sLiOjpnWWxoIYEPFXcyENX4zaWmR5qAZnyb54f6c1Yw=
 **Total**: 8 file baru dibuat + 1 file dimodifikasi ✅
 
 Silakan konfirmasi apakah sudah sesuai. Jika sudah OK, kita lanjut ke **Tahap 2: Setup Railway & Deploy Laravel** (push ke GitHub, login Railway CLI, init project, deploy, set env variables).
+
+# Tahap 2 Perubahan - !
+
+# ✅ Tahap 2 Selesai! Laravel Service Deployed 🎉
+
+## Status Terkini:
+
+| Item | Status | Detail |
+|---|---|---|
+| **Railway CLI** | ✅ Installed | v5.27.0 |
+| **Login Railway** | ✅ Berhasil | Akun chelseamaharani |
+| **Project** | ✅ CVision | https://railway.com/project/d6483b18-a1f3-44c9-a109-795d89dec249 |
+| **Laravel Service** | ✅ **Online** | https://cvision-production-6a2c.up.railway.app |
+| **Dockerfile Fix** | ✅ 3x iteration | Memory limit → Vite native binding → Success |
+| **Environment Variables** | ✅ Set | APP_KEY, APP_ENV, APP_DEBUG, SESSION_DRIVER, CACHE_STORE |
+
+## 🔧 Root Cause Build Failure (sebelumnya):
+
+1. **Memory limit** — `docker-php-ext-install -j$(nproc)` pakai semua CPU thread, di-fix dengan `-j1` 
+2. **Vite 8 + rolldown** — Flag `--ignore-scripts` mencegah install native binary `@rolldown/binding-linux-x64-musl` untuk Alpine
+3. **package-lock.json** — Tidak ada di repo, `npm ci` gagal. Digenerate & di-commit
+
+## 📋 Langkah Selanjutnya — Tahap 3: Setup MySQL Database
+
+Yang akan dilakukan:
+1. Add MySQL service dari Railway dashboard
+2. Copy credentials ke Laravel env variables
+3. Set `DB_CONNECTION=mysql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+4. Run migration: `railway run php artisan migrate`
+
+**Konfirmasi** apakah ingin lanjut ke **Tahap 3: Setup MySQL Database**?
+
+# Prubahan Tahap 3 - !
+
+Successfully deployed Laravel service to Railway and configured MySQL database connection.
+
+## ✅ Stage 3 Complete: MySQL Database Setup
+
+- [x] MySQL service is online
+- [x] Set all DB environment variables (DB_CONNECTION, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD)
+- [x] Laravel service is running and ready for database operations
+
+## Ready for Stage 4: Deploy Python AI Engine
+1. Create Python service on Railway (connected to GitHub repo)
+2. Set root directory to `/python`
+3. Configure environment variables (GEMINI_API_KEY, LARAVEL_URL)
+4. Deploy and verify health endpoint
+
+Next step is to create the Python service from the Railway dashboard or CLI. Want me to proceed?
+
+# Python service 
+
+## Langkah-langkah Membuat Python Service di Railway
+
+Berikut langkah lengkap untuk membuat dan deploy Python AI Engine:
+
+### 1️⃣ Buka Railway Dashboard
+
+Buka URL berikut di browser:
+```
+https://railway.com/project/d6483b18-a1f3-44c9-a109-795d89dec249
+```
+
+### 2️⃣ Buat Service Baru
+
+1. Klik tombol **"New"** (biasanya di pojok kanan atas)
+2. Pilih **"GitHub Repo"**
+3. Jika diminta授权, pilih repository **`chelseamaharani/CVision`**
+4. Klik **"Connect"** atau **"Add to Project"**
+
+### 3️⃣ Konfigurasi Service
+
+Setelah service dibuat, lakukan konfigurasi:
+
+**Di menu service settings:**
+
+1. **Service Name** (opsional): `cvision-python` atau biarkan default
+2. **Root Directory**: Ketik `/python` (penting! agar Railway pakai `python/Dockerfile`)
+3. **Builder**: Pastinya **"Dockerfile"** (auto-detect)
+
+### 4️⃣ Set Environment Variables
+
+Setelah service terbuat, klik **"Variables"** tab dan tambahkan:
+
+| Variable | Value | Keterangan |
+|---|---|---|
+| `GEMINI_API_KEY` | *(API key Google Gemini Anda)* | Wajib untuk AI features |
+| `LARAVEL_URL` | `https://cvision-production-6a2c.up.railway.app` | Untuk CORS configuration |
+
+**Cara menambahkan:**
+- Klik **"+ New Variable"**
+- Masukkan nama variable dan value
+- Klik **"Add"**
+- Ulangi untuk kedua variable
+
+### 5️⃣ Deploy & Tunggu Build
+
+Railway akan otomatis mulai build dan deploy. Proses ini memakan waktu **5-10 menit** karena:
+- Download dependencies Python
+- Download SBERT model (~80MB)
+- Build Docker image
+
+**Pantau progress:**
+- Klik tab **"Deployments"** untuk melihat build log
+- Lihat **"Logs"** tab untuk real-time output
+
+### 6️⃣ Verifikasi Health Check
+
+Setelah deploy selesai (status **"Active"**), test health endpoint:
+
+**Dari terminal lokal:**
+```bash
+railway run --service cvision-python curl http://localhost:8080/health
+```
+
+Atau dari browser, buka URL service (akan muncul di dashboard setelah deploy).
+
+### 7️⃣ Link Python URL ke Laravel
+
+Setelah Python service online, copy URL-nya (biasanya format `cvision-python-production-xxx.up.railway.app`), lalu set di Laravel:
+
+```bash
+railway variables --set PYTHON_AI_URL=https://cvision-python-production-xxx.up.railway.app --service CVision
+```
+
+### 8️⃣ Troubleshooting Jika Build Gagal
+
+**Error: Memory exceeded**
+- Klik service → **"Settings"** → **"Resources"**
+- Naikkan RAM ke **1GB** (tambah ~$0.17/minggu)
+
+**Error: Port already in use**
+- Cek `python/railway.json` sudah ada `"healthcheckPath": "/health"`
+- Pastikan `CMD` di Dockerfile pakai `--workers 1`
+
+**Error: SBERT model download timeout**
+- Railway otomatis retry, tunggu saja
+- Jika gagal terus, cek koneksi internet Railway (biasanya stabil)
+
+### ✅ Checklist Setelah Python Deploy
+
+- [ ] Python service status: **Active**
+- [ ] Health endpoint return 200 OK
+- [ ] `GEMINI_API_KEY` dan `LARAVEL_URL` sudah diset
+- [ ] `PYTHON_AI_URL` sudah di-set di Laravel
+- [ ] Test manual: Panggil endpoint `/health` dan `/api/test`
+
+---
+
+**Siap dilanjutkan ke Stage 5 (File Storage Volume) setelah Python service berhasil deploy.**
 
 ## 📊 Ringkasan Proyek
 
@@ -130,7 +280,7 @@ Silakan konfirmasi apakah sudah sesuai. Jika sudah OK, kita lanjut ke **Tahap 2:
 │  ┌─────────────────────┐    ┌─────────────────────┐          │
 │  │   Laravel Service   │    │  Python AI Engine   │          │
 │  │   (PHP 8.3 + Nginx) │    │  (FastAPI + SBERT)  │          │
-│  │   Port: 80          │    │  Port: 8000         │          │
+│  │   Port: 80          │    │  Port: 8080        │          │
 │  │   Domain: cvision-  │    │  Domain: cvision-   │          │
 │  │   laravel.railway   │    │  python.railway     │          │
 │  └────────┬────────────┘    └──────────┬──────────┘          │
@@ -372,15 +522,15 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY python/ .
 
 # Expose port
-EXPOSE 8000
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # Run with uvicorn
 # Gunakan --workers 1 karena SBERT model tidak thread-safe
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--timeout-keep-alive", "120"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1", "--timeout-keep-alive", "120"]
 ```
 
 ### 4. `railway.json` (Root)
