@@ -2,10 +2,8 @@
 
     {{-- Kiri: Logo + Nama Aplikasi --}}
     <div class="flex items-center gap-3">
-        {{-- Logo - kosongkan dulu, nanti ganti src setelah logo di-upload --}}
         <div class="w-9 h-9 rounded-full bg-white/30 flex items-center justify-center overflow-hidden flex-shrink-0">
-            {{-- Setelah ada logo, ganti baris di bawah dengan:
-                 <img src="{{ asset('images/logo.png') }}" class="w-full h-full object-cover"> --}}
+            <img src="{{ asset('images/logo.png') }}" alt="CVision Logo" class="w-full h-full object-cover">
         </div>
 
         <span class="text-white font-semibold text-lg">
