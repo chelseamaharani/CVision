@@ -30,7 +30,7 @@ it('role defaults to pelamar when not specified', function () {
 it('user fillable attributes match expected fields', function () {
     $user = new User();
 
-    expect($user->getFillable())->toEqual(['name', 'email', 'password', 'role']);
+    expect($user->getFillable())->toEqual(['name', 'email', 'password', 'role', 'google_id']);
 });
 
 it('password and remember_token are hidden from array/json', function () {

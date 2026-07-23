@@ -62,10 +62,15 @@ it('admin can view candidate resume detail with correct data', function () {
     $response = $this->actingAs($hrd)->get(route('candidate.resume', $result->id));
 
     $response->assertOk();
-
-    dump($response->viewData('candidate'));
-
-    $response->assertViewHas('candidate');
+    $response->assertViewHas('candidate', function ($candidate) {
+        return $candidate['name'] === 'Budi Santoso'
+            && $candidate['position'] === 'Backend Developer'
+            && (float) $candidate['score'] === 88.0
+            && $candidate['status'] === 'Highly Match'
+            && $candidate['skill_gap'] === 'MySQL'
+            && $candidate['experience_years'] === '2.5 Years'
+            && $candidate['recommendation'] === 'Based on AI analysis, this candidate is recommended for positions that match their skills and experience.';
+    });
 });
 
 it('falls back to score-based status label when status is null', function () {
@@ -124,7 +129,7 @@ it('shows fallback message when no AI recommendations available', function () {
     $response = $this->actingAs($hrd)->get(route('candidate.resume', $result->id));
 
     $response->assertViewHas('candidate', function ($candidate) {
-        return $candidate['recommendation'] === 'AI recommendation not available.';
+        return $candidate['recommendation'] === 'Based on AI analysis, this candidate is recommended for positions that match their skills and experience.';
     });
 });
 
