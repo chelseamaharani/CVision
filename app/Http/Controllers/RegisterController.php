@@ -20,8 +20,18 @@ class RegisterController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:255|unique:users,name',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
+            'email'    => 'required|email:rfc,dns|unique:users,email',
+            'password' => 'required|string|min:6|max:8|confirmed',
+        ], [
+            'name.required'      => 'Username wajib diisi.',
+            'name.unique'        => 'Username sudah digunakan.',
+            'email.required'     => 'Email wajib diisi.',
+            'email.email'        => 'Format email tidak valid.',
+            'email.unique'       => 'Email sudah terdaftar.',
+            'password.required'  => 'Password wajib diisi.',
+            'password.min'       => 'Password minimal 6 karakter.',
+            'password.max'       => 'Password maksimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
         $user = User::create([
@@ -33,6 +43,6 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('landing');  // Pelamar → landing page
+        return redirect()->route('landing')->with('success', 'Registrasi berhasil! Selamat datang.');
     }
 }
