@@ -1,3 +1,89 @@
+## ✅ Semua Perbaikan Selesai — Dokumentasi Perubahan
+
+Berikut adalah **3 masalah** yang teridentifikasi dan perbaikan yang telah dilakukan:
+
+---
+
+### 🔧 Perbaikan 1: Logo Tidak Muncul di Railway (Case Sensitivity)
+
+**Penyebab:** File `public/images/Logo.png` (huruf L besar) tidak cocok dengan pemanggilan `asset('images/logo.png')` (huruf l kecil) di Blade views. Windows case-insensitive, Linux case-sensitive.
+
+**Perubahan:**
+- ✅ **Rename file:** `public/images/Logo.png` → `public/images/logo.png`
+- ✅ **topbar.blade.php:** Ganti SVG placeholder dengan `<img src="{{ asset('images/logo.png') }}">` (sebelumnya masih pakai SVG icon default)
+
+**File yang sudah benar memanggil `images/logo.png`:**
+- `resources/views/components/navbar.blade.php` (line 7)
+- `resources/views/components/navbar_pelamar.blade.php` (line 6)
+- `resources/views/components/topbar.blade.php` (line 8) ✅ **diperbaiki**
+
+---
+
+### 🔧 Perbaikan 2: Storage Permission Denied (`laravel.log`)
+
+**Penyebab 1 — `|| true` di Dockerfile:**
+```dockerfile
+# SEBELUM (salah):
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache \
+    && chmod -R 775 /app/storage /app/bootstrap/cache || true
+# '|| true' membuat error chown/chmod tidak terdeteksi
+```
+
+**Perubahan Dockerfile:**
+- ✅ **Hapus `|| true`** — agar build gagal jika permission setup gagal
+- ✅ **Tambah `chmod` eksplisit** untuk subdirektori: `storage/logs`, `storage/framework`, `storage/app`
+- ✅ **Semua `artisan` commands di startup script** sekarang dijalankan sebagai `www-data` user menggunakan `su -s /bin/sh www-data -c "..."` — mencegah file dibuat sebagai root
+
+```dockerfile
+# SESUDAH (benar):
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache \
+    && chmod -R 775 /app/storage /app/bootstrap/cache \
+    && chmod -R 775 /app/storage/logs \
+    && chmod -R 775 /app/storage/framework \
+    && chmod -R 775 /app/storage/app
+```
+
+---
+
+### 🔧 Perbaikan 3: Environment Variables di Railway
+
+**Penyebab:** File `.env` tidak ikut ke Docker image (ada di `.dockerignore`). Railway perlu env variables di-set manual di Dashboard.
+
+**Yang perlu Anda lakukan di Railway Dashboard:**
+1. Buka Railway Dashboard → Project CVision → Laravel Service → Variables
+2. Set variabel berikut:
+
+| Variable | Value | Keterangan |
+|----------|-------|------------|
+| `APP_ENV` | `production` | Mode production |
+| `APP_DEBUG` | `false` | Matikan debug |
+| `APP_URL` | `https://cvision-production-6a2c.up.railway.app` | URL Railway |
+| `LOG_CHANNEL` | `stderr` | **PENTING!** Agar log mengalir ke stdout/stderr container, bukan ke file `storage/logs/laravel.log` |
+| `LOG_LEVEL` | `error` | Hanya log error (kurangi disk usage) |
+| `SESSION_DRIVER` | `database` | Session via database |
+| `CACHE_STORE` | `database` | Cache via database |
+
+> **💡 Tips:** Set `LOG_CHANNEL=stderr` adalah solusi paling ampuh untuk error permission `laravel.log` — karena log akan dikirim ke stderr container (bisa dilihat di Railway Logs) bukan ke file.
+
+---
+
+### 📋 Ringkasan File yang Dimodifikasi
+
+| File | Perubahan |
+|------|-----------|
+| `public/images/logo.png` | Rename dari `Logo.png` (case-sensitive fix) |
+| `Dockerfile` | Hapus `|| true`, tambah chmod subdirektori, semua artisan commands pakai `su -s /bin/sh www-data` |
+| `resources/views/components/topbar.blade.php` | Ganti SVG placeholder dengan `<img src="{{ asset('images/logo.png') }}">` |
+
+### 🚀 Langkah Selanjutnya
+
+Setelah push ke GitHub dan redeploy di Railway:
+1. Set `LOG_CHANNEL=stderr` di Railway Dashboard (variabel environment)
+2. Redeploy akan otomatis terjadi setelah push
+3. Cek Railway Logs untuk memastikan tidak ada error permission lagi
+4. Logo akan muncul karena sekarang nama file `logo.png` cocok dengan pemanggilan di Blade
+
+
 # CVision - AI-Powered CV Matching System
 
 CVision adalah sistem rekrutmen cerdas yang menggunakan AI untuk mencocokkan CV kandidat dengan posisi pekerjaan yang tersedia. Sistem ini menggabungkan **TF-IDF**, **SBERT (Semantic Search)**, dan **Gemini AI** untuk memberikan skor kecocokan yang akurat.

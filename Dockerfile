@@ -58,9 +58,13 @@ RUN NODE_OPTIONS="--max-old-space-size=512" npm ci && \
 # Copy Nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Set permissions
+# Set permissions — www-data harus bisa menulis ke storage & bootstrap/cache
+# Hapus '|| true' agar Docker build gagal jika chown/chmod gagal
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache \
-    && chmod -R 775 /app/storage /app/bootstrap/cache || true
+    && chmod -R 775 /app/storage /app/bootstrap/cache \
+    && chmod -R 775 /app/storage/logs \
+    && chmod -R 775 /app/storage/framework \
+    && chmod -R 775 /app/storage/app
 
 # Create startup script
 RUN printf '%s\n' \
@@ -84,16 +88,16 @@ RUN printf '%s\n' \
     '    echo "WARNING: PHP-FPM may not be ready yet, continuing anyway..."' \
     'fi' \
     '' \
-    '# Run Laravel optimizations with runtime env vars' \
+    '# Run Laravel optimizations with runtime env vars (as www-data)' \
     'echo "Running Laravel optimizations..."' \
-    'php artisan config:cache 2>/dev/null || true' \
-    'php artisan route:cache 2>/dev/null || true' \
-    'php artisan view:cache 2>/dev/null || true' \
-    'php artisan storage:link 2>/dev/null || true' \
+    'su -s /bin/sh www-data -c "php artisan config:cache 2>/dev/null || true"' \
+    'su -s /bin/sh www-data -c "php artisan route:cache 2>/dev/null || true"' \
+    'su -s /bin/sh www-data -c "php artisan view:cache 2>/dev/null || true"' \
+    'su -s /bin/sh www-data -c "php artisan storage:link 2>/dev/null || true"' \
     '' \
-    '# Run database migrations for production' \
+    '# Run database migrations for production (as www-data)' \
     'echo "Running database migrations..."' \
-    'php artisan migrate --force 2>/dev/null || true' \
+    'su -s /bin/sh www-data -c "php artisan migrate --force 2>/dev/null || true"' \
     '' \
     'echo "Starting Nginx..."' \
     'nginx -g "daemon off;"' \

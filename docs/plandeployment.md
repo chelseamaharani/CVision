@@ -1,3 +1,255 @@
+## 🧠 IDENTIFIKASI AI DI WEBSITE CVision
+
+### Arsitektur AI: Hybrid (Laravel + Python FastAPI)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    LARAVEL (PHP)                             │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  GeminiAIService.php                                  │   │
+│  │  → HTTP Client ke FastAPI Python backend              │   │
+│  │  → Mengirim CV text + job description                 │   │
+│  │  → Menerima hasil scoring + rekomendasi               │   │
+│  └──────────────────────────────────────────────────────┘   │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  CVScoreService.php                                   │   │
+│  │  → Orchestrator: extract PDF → AI → cache → save DB  │   │
+│  │  → Fallback rekomendasi jika Gemini gagal             │   │
+│  └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                              │ HTTP POST
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 PYTHON FASTAPI (main.py)                     │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  Endpoint: POST /api/cv/analyze-text                  │   │
+│  │  Endpoint: POST /api/cv/analyze (upload PDF)         │   │
+│  │  Endpoint: POST /api/cv/generate-resume              │   │
+│  │  Endpoint: POST /api/cv/generate-resume-text         │   │
+│  │  Endpoint: GET  /health                              │   │
+│  └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 🔬 AI / MODEL YANG DIGUNAKAN (5 Komponen)
+
+| No | Nama AI/Model | Jenis | Fungsi | File |
+|----|--------------|-------|--------|------|
+| **1** | **TF-IDF Vectorizer** | NLP / Information Retrieval | Menghitung kemiripan kata kunci antara CV dan job description. Menggunakan n-gram (1-2) + sublinear tf. | `python/services/similarity.py` |
+| **2** | **SBERT (Sentence-BERT)** | Deep Learning / Semantic | Menghitung kemiripan semantik/konteks kalimat antara CV dan job description. Model: `all-MiniLM-L6-v2` | `python/services/similarity.py` |
+| **3** | **Hybrid Score** | Weighted Fusion | Menggabungkan TF-IDF (50%) + SBERT (50%) menjadi satu skor akhir | `python/services/similarity.py` |
+| **4** | **Google Gemini AI** | Large Language Model (LLM) | **3 fungsi:** <br>• Rekomendasi 5 pekerjaan teratas dari CV<br>• Analisis skill gap (skills_present vs skills_missing)<br>• Generate resume terstruktur dari teks CV | `python/services/gemini_client.py` |
+| **5** | **Rule-based Extraction** | Heuristic | Ekstrak tahun pengalaman & tingkat pendidikan dari teks CV menggunakan regex | `python/services/text_processor.py` |
+
+---
+
+### 📊 ALUR KERJA AI (End-to-End)
+
+```
+CV PDF Upload
+     │
+     ▼
+┌─────────────────┐
+│ PDF Extractor   │ ← PyMuPDF (fitz)
+│ (extract_pdf)   │
+└────────┬────────┘
+         │ CV Text
+         ▼
+┌─────────────────┐
+│ Text Processor  │ ← lowercase, hapus simbol, hapus spasi ganda
+│ (preprocess)    │
+└────────┬────────┘
+         │ Clean Text
+         ▼
+┌──────────────────────────────────────────────────────┐
+│              SIMILARITY ENGINE                        │
+│  ┌────────────┐  ┌────────────┐  ┌────────────────┐ │
+│  │  TF-IDF    │  │   SBERT    │  │   HYBRID       │ │
+│  │  (sklearn) │  │(MiniLM-L6) │  │ 0.5*TF + 0.5*SB│ │
+│  │  score 0-1 │  │  score 0-1 │  │  → percentage  │ │
+│  └────────────┘  └────────────┘  └────────────────┘ │
+└──────────────────────────────────────────────────────┘
+         │
+         ▼
+┌──────────────────────────────────────────────────────┐
+│              GEMINI AI (LLM)                          │
+│  ┌────────────────────┐  ┌────────────────────────┐  │
+│  │ Job Recommendations│  │   Skill Gap Analysis   │  │
+│  │ → 5 rekomendasi    │  │ → skills_present[]     │  │
+│  │ → confidence score │  │ → skills_missing[]     │  │
+│  │ → reasoning        │  │ → fit_score            │  │
+│  └────────────────────┘  │ → recommendation       │  │
+│                          └────────────────────────┘  │
+│  ┌────────────────────────────────────────────────┐  │
+│  │ Resume Generator (Gemini)                      │  │
+│  │ → Extract: nama, email, pengalaman, pendidikan │  │
+│  │ → Format JSON terstruktur                      │  │
+│  └────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Save to DB     │ ← matching_results table
+│  + Cache (1 jam)│
+└─────────────────┘
+```
+
+---
+
+### 📦 TEKNOLOGI YANG DIGUNAKAN
+
+| Komponen | Teknologi |
+|----------|-----------|
+| **Framework Web** | Laravel 13 (PHP 8.3) + FastAPI (Python) |
+| **NLP / Text Similarity** | scikit-learn TfidfVectorizer, Sentence-Transformers |
+| **LLM** | Google Gemini 2.0 Flash Lite (`gemini-2.0-flash-lite`) |
+| **PDF Extraction** | PyMuPDF (fitz) |
+| **Deployment** | Railway (Docker) |
+| **Database** | MySQL |
+
+---
+
+## 📋 PREDIKSI PERTANYAAN SIDANG PROPOSAL
+
+### A. Pertanyaan Umum & Latar Belakang
+
+1. **"Apa latar belakang masalah yang mendorong Anda membuat CVision?"**
+   - Jawab: Proses rekrutmen manual memakan waktu, CV screening tidak efisien, subjektivitas HR.
+
+2. **"Apa perbedaan CVision dengan ATS (Applicant Tracking System) yang sudah ada?"**
+   - Jawab: CVision menggunakan AI (TF-IDF + SBERT + Gemini) untuk scoring otomatis, bukan hanya keyword matching sederhana.
+
+3. **"Siapa target user aplikasi ini?"**
+   - Jawab: HRD/Admin (untuk screening) dan Pelamar (untuk upload CV dan lihat hasil).
+
+### B. Pertanyaan tentang AI / Algoritma
+
+4. **"Kenapa menggunakan TF-IDF? Apa kelebihan dan kekurangannya?"**
+   - Kelebihan: Sederhana, cepat, cocok untuk keyword matching.
+   - Kekurangan: Tidak menangkap sinonim atau konteks semantik.
+
+5. **"Kenapa menggunakan SBERT? Apa bedanya dengan TF-IDF?"**
+   - SBERT menangkap makna semantik kalimat, bukan hanya kata kunci. Contoh: "Saya ahli Python" dan "Saya menguasai Python" dianggap mirip oleh SBERT, tapi berbeda oleh TF-IDF.
+
+6. **"Kenapa menggunakan hybrid score (TF-IDF + SBERT)? Tidak pakai salah satu saja?"**
+   - TF-IDF bagus untuk keyword spesifik, SBERT bagus untuk konteks. Hybrid menggabungkan keduanya dengan bobot 50:50.
+
+7. **"Apa itu model all-MiniLM-L6-v2? Kenapa memilih model itu?"**
+   - Model SBERT yang ringan (80MB) dan cepat, cocok untuk production. Trade-off: akurasi sedikit lebih rendah dari model besar.
+
+8. **"Apa fungsi Google Gemini di sini? Kenapa tidak pakai GPT / LLM lain?"**
+   - Gemini untuk rekomendasi pekerjaan dan analisis skill gap. Alasan: free tier murah, API key mudah didapat.
+
+9. **"Bagaimana cara Gemini menghasilkan rekomendasi pekerjaan?"**
+   - Prompt engineering: CV text dikirim ke Gemini dengan instruksi spesifik untuk output JSON.
+
+10. **"Apa yang terjadi jika Gemini sedang down atau rate limited?"**
+    - Ada fallback: rekomendasi dibuat berdasarkan skill matching saja (tanpa LLM).
+
+### C. Pertanyaan tentang Arsitektur
+
+11. **"Kenapa arsitekturnya Laravel + Python FastAPI? Kenapa tidak semua di PHP?"**
+    - Python memiliki library NLP yang matang (scikit-learn, sentence-transformers). PHP tidak punya ekosistem ML yang baik.
+
+12. **"Bagaimana komunikasi antara Laravel dan Python?"**
+    - HTTP POST via Laravel Http Client ke endpoint FastAPI.
+
+13. **"Bagaimana cara deployment? Apakah Python backend juga di-deploy?"**
+    - Satu Docker container berisi Laravel + Nginx + PHP-FPM. Python FastAPI bisa di service terpisah atau di container yang sama.
+
+### D. Pertanyaan tentang Performa & Akurasi
+
+14. **"Bagaimana cara mengukur akurasi sistem ini?"**
+    - Bisa menggunakan precision/recall, atau membandingkan hasil AI dengan penilaian HR manual.
+
+15. **"Berapa lama waktu yang dibutuhkan untuk memproses satu CV?"**
+    - Tergantung: TF-IDF cepat (<1 detik), SBERT (~2-3 detik), Gemini (~3-5 detik). Total ~5-10 detik per CV.
+
+16. **"Apa yang terjadi jika CV yang diupload bukan PDF?"**
+    - Sistem menolak dengan error 400: "Only PDF files are supported".
+
+17. **"Bagaimana jika CV tidak bisa di-extract text-nya (misalnya scan gambar)?"**
+    - Sistem mengembalikan error 422: "No text could be extracted from the PDF".
+
+### E. Pertanyaan tentang Database & Data
+
+18. **"Apa saja tabel yang terlibat dalam proses scoring?"**
+    - `users`, `cvs`, `upload_jobs`, `matching_results`.
+
+19. **"Bagaimana cara menyimpan hasil analisis AI?"**
+    - Disimpan di tabel `matching_results` dengan kolom: tfidf_score, sbert_score, hybrid_score, match_percentage, skills_matched, skill_gap, dll.
+
+20. **"Apakah ada caching? Kenapa?"**
+    - Ya, cache 1 jam untuk CV + job yang sama, agar tidak memanggil AI berulang kali.
+
+### F. Pertanyaan tentang Keamanan & Etika
+
+21. **"Bagaimana keamanan data CV pelamar?"**
+    - File disimpan di storage, hanya admin yang bisa akses. Ada autentikasi via Laravel.
+
+22. **"Apakah ada bias dalam AI? Bagaimana mengatasinya?"**
+    - TF-IDF dan SBERT bisa bias terhadap bahasa/terminologi tertentu. Perlu diversifikasi data training.
+
+23. **"Apakah data CV dikirim ke pihak ketiga (Gemini API)?"**
+    - Ya, teks CV dikirim ke Google Gemini API untuk rekomendasi. Ini perlu dipertimbangkan dari sisi privasi data.
+
+### G. Pertanyaan tentang Pengembangan ke Depan
+
+24. **"Apa rencana pengembangan selanjutnya?"**
+    - Contoh: Integrasi dengan LinkedIn API, dukungan file DOCX, multiple language, dashboard analitik.
+
+25. **"Apakah bisa diintegrasikan dengan job portal lain?"**
+    - Bisa, karena arsitektur modular. Tinggal tambah endpoint/connector.
+
+26. **"Bagaimana jika ingin menggunakan model AI lain selain Gemini?"**
+    - Tinggal ganti implementasi di `GeminiClient` atau buat class baru yang implement `AIService` interface.
+
+---
+
+### 💡 Tips Menjawab Sidang
+
+| Poin | Penjelasan |
+|------|-----------|
+| **TF-IDF** | "TF-IDF menghitung seberapa penting suatu kata dalam CV dibandingkan job description. Semakin sering kata muncul di CV tapi jarang di dokumen lain, semakin tinggi skornya." |
+| **SBERT** | "SBERT mengubah kalimat menjadi vektor (embedding) lalu menghitung cosine similarity. Bisa menangkap sinonim dan konteks." |
+| **Hybrid** | "Kami menggabungkan keduanya karena TF-IDF bagus untuk keyword, SBERT bagus untuk konteks. Bobot 50:50." |
+| **Gemini** | "Gemini digunakan untuk rekomendasi pekerjaan yang lebih natural dan analisis skill gap. Output berupa JSON yang sudah diparsing." |
+| **Fallback** | "Jika Gemini gagal, sistem tetap bisa memberikan rekomendasi berbasis skill matching agar tidak gagal total." |
+
+
+## Langkah-langkah di Railway Dashboard:
+
+1. Buka **Railway Dashboard** → Project **CVision**
+2. Klik tab **Deployments**
+3. Pilih deployment yang **Active / Running** (bukan queued)
+4. Klik tombol **"Shell"** atau **"Console"** (icon `>_` biasanya di kanan atas)
+5. Di terminal yang muncul, jalankan:
+
+```bash
+php artisan migrate --force
+```
+
+6. Tunggu sampai selesai — akan terlihat output:
+   - ✅ `2026_07_21_181954_add_google_id_to_users_table ............................ DONE`
+   - ✅ `2026_07_22_000001_create_sessions_table ................................. DONE`
+
+7. Setelah selesai, coba akses:
+   ```
+   https://cvision.up.railway.app/auth/google
+   ```
+
+## Yang sudah saya siapkan di codebase (untuk setelah commit queue terproses):
+- ✅ **Dockerfile** — `--no-scripts` dihapus, Socialite provider akan terdaftar otomatis
+- ✅ **Dockerfile** — `php artisan migrate --force` ditambahkan di startup script
+- ✅ **Migration session table** — untuk `SESSION_DRIVER=database` di Railway
+
+Setelah migration berhasil dijalankan, error `Unknown column 'google_id'` akan teratasi dan Google Login seharusnya berfungsi normal.
+
+
+
+
 # 📋 Rencana Deployment CVision ke Railway
 
 # perubahan 1 - !

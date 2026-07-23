@@ -2,12 +2,9 @@
 
     {{-- Kiri: Logo bulat + nama app + separator + welcome --}}
     <div class="flex items-center gap-3">
-        {{-- Logo bulat - ganti dengan logo asli --}}
+        {{-- Logo bulat - logo CVision --}}
         <div class="w-8 h-8 rounded-full bg-[#E8EAFF] flex items-center justify-center overflow-hidden border-2 border-[#3730A3]/30 flex-shrink-0">
-            {{-- Ganti baris ini dengan: <img src="{{ asset('images/logo.png') }}" class="w-full h-full object-cover"> --}}
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#3730A3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
+            <img src="{{ asset('images/logo.png') }}" alt="CVision Logo" class="w-full h-full object-cover">
         </div>
 
         {{-- Nama aplikasi (HARDCODE - ganti teks CVision sesuai kebutuhan) --}}
