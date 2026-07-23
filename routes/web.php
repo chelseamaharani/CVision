@@ -29,10 +29,13 @@ Route::get('/forgot-password', fn() => redirect('/login'))->name('password.reque
 // ===== ROOT (/) - Landing page pelamar, BISA diakses tanpa login =====
 Route::get('/', [LandingPagePelamarController::class, 'index'])->name('landing');
 
-// ===== AKSI PELAMAR YANG WAJIB LOGIN (submit CV, hapus CV) =====
+// ===== AKSI PELAMAR YANG WAJIB LOGIN (submit CV, hapus CV, lihat file CV) =====
 Route::middleware(['auth'])->group(function () {
     Route::post('/upload-cv', [LandingPagePelamarController::class, 'store'])->name('cv.store');
     Route::delete('/upload-cv/{id}', [LandingPagePelamarController::class, 'destroy'])->name('cv.destroy');
+    
+    // Route untuk menampilkan/download file CV tanpa symlink public/storage
+    Route::get('/cv/{id}/file', [App\Http\Controllers\CvFileController::class, 'show'])->name('cv.file');
 });
 
 // ===== DASHBOARD HRD & FITUR (admin only, perlu login) =====

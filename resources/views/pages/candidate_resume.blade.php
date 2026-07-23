@@ -309,16 +309,8 @@ $candidate = $candidate ?? [
         // Pastikan email valid untuk mailto
         $emailTo = $candidate['email'] && $candidate['email'] !== '-' ? $candidate['email'] : '';
         
-        // Dapatkan path file CV yang benar
-        $cvDownloadPath = null;
-        if ($candidate['cv_path']) {
-            $fullPath = storage_path('app/' . $candidate['cv_path']);
-            if (file_exists($fullPath)) {
-                $cvDownloadPath = asset('storage/' . $candidate['cv_path']);
-            } elseif (file_exists($candidate['cv_path'])) {
-                $cvDownloadPath = asset('storage/' . basename($candidate['cv_path']));
-            }
-        }
+        // Dapatkan ID CV untuk route file download via controller (bukan symlink public/storage)
+        $cvModelId = $candidate['cv_model_id'] ?? null;
         
         // Nama file untuk resume download
         $resumeFileName = str_replace(' ', '_', ($candidate['name'] ?? 'Resume')) . '_CVision_Resume.txt';
@@ -352,9 +344,9 @@ $candidate = $candidate ?? [
             </svg>
             Download Resume
         </a>
-    @elseif($cvDownloadPath)
-        {{-- Fallback: download original PDF --}}
-        <a href="{{ $cvDownloadPath }}" 
+    @elseif($cvModelId)
+        {{-- Download original PDF via CvFileController (no symlink needed) --}}
+        <a href="{{ route('cv.file', $cvModelId) }}" 
            download="{{ $candidate['name'] ?? 'Resume' }}_CV.pdf"
            target="_blank"
            class="flex-1 w-full sm:w-auto flex items-center justify-center gap-2 bg-[#2D3799] hover:bg-[#232d85] text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors shadow-md">
