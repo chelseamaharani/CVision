@@ -123,6 +123,7 @@ class CandidateResumeController extends Controller
              // Files & Resume
              'cv_path'           => $result->cv->file_path,
              'cv_id_display'     => $result->cv_id,
+             'cv_model_id'       => $result->cv->id,
              'cv_text'           => $cvText ? mb_substr($cvText, 0, 5000) : null,
              'structured_resume' => $structuredResume,
              'resume_text'       => $resumeText,

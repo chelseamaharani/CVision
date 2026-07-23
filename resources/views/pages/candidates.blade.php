@@ -76,7 +76,7 @@
 
             <div class="col-span-5 flex items-center gap-2">
                 @if($candidate['cv_path'])
-                    <a href="{{ asset('storage/' . $candidate['cv_path']) }}" target="_blank"
+                    <a href="{{ route('cv.file', $candidate['id']) }}" target="_blank"
                        class="inline-flex items-center gap-1.5 border-2 border-[#2D3799] text-[#2D3799] font-semibold text-xs px-3 py-2 rounded-lg hover:bg-[#2D3799] hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
